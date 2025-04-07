@@ -121,4 +121,41 @@
 
 @theme {
   --font-jakarta: 'Plus Jakarta Sans', sans-serif;
+
+  --violet-050: #f9ecfd;
+  --violet-100: #ecc5f9;
+  --violet-200: #e3a9f6;
+  --violet-300: #d682f2;
+  --violet-400: #ce69ef;
+  --violet-500: #c244eb;
+  --violet-600: #b13ed6;
+  --violet-700: #8a30a7;
+  --violet-800: #6b2581;
+  --violet-900: #511d63;
+
+  --text-h7: 16px;
+  --text-h6: 20px;
+  --text-h5: 24px;
+  --text-h4: 30px;
+  --text-h3: 36px;
+  --text-h2: 48px;
+  --text-h1: 60px;
+
+  --text-s8: 14px;
+  --text-s7: 16px;
+  --text-s6: 20px;
+  --text-s5: 24px;
+  --text-s4: 30px;
+  --text-s3: 36px;
+  --text-s2: 48px;
+  --text-s1: 60px;
+
+  --text-p8: 14px;
+  --text-p7: 16px;
+  --text-p6: 20px;
+  --text-p5: 24px;
+  --text-p4: 30px;
+  --text-p3: 36px;
+  --text-p2: 48px;
+  --text-p1: 60px;
 }

@@ -1,29 +1,76 @@
+import { Laptop2, LayoutGrid } from "lucide-react";
+import { SimpleTooltip } from "./tooltip";
+import { motion } from "framer-motion";
+import { Link } from "react-router";
+
+import {
+    Avatar,
+    AvatarFallback,
+    AvatarImage,
+} from "~/components/ui/avatar";
+
+
+const features: {
+    name: string;
+    icon: React.JSX.Element;
+    path: string;
+}[] = [
+        {
+            name: "Home",
+            icon: <LayoutGrid />,
+            path: "/"
+        },
+        {
+            name: "Course",
+            icon: <Laptop2 />,
+            path: "/courses"
+        }
+    ]
 export default function Sidebar() {
     return (
-        <div className="fixed top-0 left-0 w-64 h-screen bg-gray-800 text-white p-4">
-            <h2 className="text-2xl font-bold mb-4">Sidebar</h2>
-            <ul className="space-y-2">
-                <li>
-                    <a href="#" className="block p-2 hover:bg-gray-700 rounded">
-                        Dashboard
-                    </a>
-                </li>
-                <li>
-                    <a href="#" className="block p-2 hover:bg-gray-700 rounded">
-                        Settings
-                    </a>
-                </li>
-                <li>
-                    <a href="#" className="block p-2 hover:bg-gray-700 rounded">
-                        Profile
-                    </a>
-                </li>
-                <li>
-                    <a href="#" className="block p-2 hover:bg-gray-700 rounded">
-                        Logout
-                    </a>
-                </li>
-            </ul>
-        </div>
+        <motion.div
+            initial={{ x: -200 }}
+            animate={{ x: 0 }}
+            exit={{ x: -200 }}
+            transition={{ duration: 0.5 }}
+            className="p-8 rounded-r-4xl bg-gray-100 left-0 h-[90%] shadow-2xl flex flex-col items-center gap-8">
+            <img
+                src="/eduvate-icon.png"
+                width={52}
+            />
+            <div className="grow flex flex-col items-center gap-8">
+                {
+                    features.map((feature) => (
+                        <SimpleTooltip
+                            content={feature.name}
+                            side="right"
+                        >
+                            <Link
+                                to={feature.path}
+                            >
+                                <button className="bg-violet-100 hover:bg-violet-200 p-4 rounded-2xl transition-all duration-300 ease-in-out text-black cursor-pointer" key={feature.name}>
+                                    <div className="flex flex-col items-center gap-2">
+                                        {feature.icon}
+                                    </div>
+                                </button>
+                            </Link>
+                        </SimpleTooltip>
+                    ))
+                }
+            </div>
+
+            <Link
+                to={"/profile"}
+            >
+                <Avatar
+                    className="w-10 h-10"
+                >
+                    <AvatarImage src="https://github.com/shadcn.png" alt="@shadcn" />
+                    <AvatarFallback>CN</AvatarFallback>
+                </Avatar>
+            </Link>
+
+
+        </motion.div>
     )
 }

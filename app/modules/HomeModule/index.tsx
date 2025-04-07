@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useKeyPress } from "~/hooks/useSpacePress";
-import useSpeakText from "~/hooks/useSpeakText";
+import useSpeakText from "~/hooks/useSpeakSpeech";
 
 export default function HomePage() {
 

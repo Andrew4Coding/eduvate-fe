@@ -5,13 +5,13 @@ import { KeyPressProvider } from "~/hooks/useSpacePress";
 
 export default function Index() {
     return (
-        <main className="font-jakarta font-medium flex gap-10 h-screen items-center ">
+        <main className="font-jakarta font-medium flex gap-10 h-screen items-center relative">
             <KeyPressProvider>
                 <Sidebar />
-                <div className="h-full w-full">
+                <div className="h-full w-full relative">
                     <Outlet />
+                    <VoiceIndicator />
                 </div>
-                <VoiceIndicator />
             </KeyPressProvider>
         </main>
     )

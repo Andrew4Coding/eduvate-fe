@@ -107,11 +107,6 @@ export default function useVoiceRecorder(options: UseVoiceRecorderOptions = {}):
         navigator.mediaDevices.addEventListener("devicechange", getAudioDevices);
 
         return () => {
-            // Clean up
-            if (animationFrameRef.current) {
-                cancelAnimationFrame(animationFrameRef.current);
-            }
-
             if (audioContextRef.current) {
                 audioContextRef.current.close();
             }

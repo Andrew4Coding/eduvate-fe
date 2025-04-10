@@ -32,6 +32,8 @@ export default function VoiceIndicator() {
             console.log("Recording completed", { blob, url })
 
             const beep = new Audio("/beep.mp3")
+            console.log("beep");
+            
             beep.play().catch()
 
             sessionStorage.getItem("hasInteracted")
@@ -103,20 +105,15 @@ export default function VoiceIndicator() {
         if (isHeld && initialSetupDone && isFirstTime) {
             sessionStorage.setItem("hasInteracted", "true")
             speech.speak("Halo! Apa yang bisa aku bantu?")
-        } else if (!isHeld && initialSetupDone) {
-            stopRecording()
-        }
-    }, [isHeld])
-
-    useEffect(() => {
-        if (!speech.isSpeaking) {
             startRecording()
 
             const beep = new Audio("/beep.mp3")
             beep.play().catch()
+        } else if (!isHeld && initialSetupDone) {
+            stopRecording()
         }
-    }, [speech.isSpeaking])
-
+    }, [isHeld])
+    
     // Handle microphone setup completion
     const handleSetupComplete = () => {
         completeMicrophoneSetup()

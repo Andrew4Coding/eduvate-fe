@@ -159,3 +159,7 @@
   --text-p2: 48px;
   --text-p1: 60px;
 }
+
+:root {
+  @apply font-jakarta font-medium
+}

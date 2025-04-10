@@ -1,7 +1,28 @@
-import { Outlet } from "react-router";
+import { Outlet, redirect, type LoaderFunctionArgs } from "react-router";
 import VoiceIndicator from "~/components/elements/VoiceIndicator";
 import Sidebar from "~/components/ui/sidebar";
 import { KeyPressProvider } from "~/hooks/useSpacePress";
+import { authClient } from "~/lib/auth-client";
+
+export async function loader(args: LoaderFunctionArgs) {
+    console.log(args.request.headers.get('Cookie'));
+    
+    const session = await authClient.getSession({
+        fetchOptions: {
+            headers: {
+                Cookie: args.request.headers.get('Cookie') || '',
+            }
+        }
+    })
+
+    console.log('session', session);
+
+    if (!session.data) {
+        return redirect('/auth')
+    }
+
+    return session;
+}
 
 export default function Index() {
     return (

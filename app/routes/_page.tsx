@@ -1,36 +1,30 @@
-import { Outlet, redirect, type LoaderFunctionArgs } from "react-router";
+import { Outlet, redirect, useLoaderData, type LoaderFunctionArgs } from "react-router";
 import VoiceIndicator from "~/components/elements/VoiceIndicator";
 import Sidebar from "~/components/ui/sidebar";
 import { KeyPressProvider } from "~/hooks/useSpacePress";
-import { authClient } from "~/lib/auth-client";
+import { getUser, type userData } from "~/lib/auth-client";
 
 export async function loader(args: LoaderFunctionArgs) {
-    console.log(args.request.headers.get('Cookie'));
-    
-    const session = await authClient.getSession({
-        fetchOptions: {
-            headers: {
-                Cookie: args.request.headers.get('Cookie') || '',
-            }
-        }
-    })
+    const user = await getUser(args.request);
 
-    console.log('session', session);
-
-    if (!session.data) {
-        return redirect('/auth')
+    if (!user) {
+        return redirect("/auth/login");
     }
 
-    return session;
+    return user;
 }
 
 export default function Index() {
+    const user: userData = useLoaderData<typeof loader>();
+    
     return (
         <main className="font-jakarta font-medium flex gap-10 h-screen items-center relative">
             <KeyPressProvider>
                 <Sidebar />
                 <div className="h-full w-full relative">
-                    <Outlet />
+                    <Outlet
+                        context={user}
+                    />
                     <VoiceIndicator />
                 </div>
             </KeyPressProvider>

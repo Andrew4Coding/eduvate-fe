@@ -191,7 +191,7 @@ export default function ProfilePage() {
                                 <p className="text-gray-500">Member since {userData.joinedDate}</p>
                             </div>
 
-                            <div className="mt-6">
+                            <div className="mt-6 space-y-4">
                                 <Button
                                     variant="outline"
                                     className="w-full border-purple-300 hover:bg-purple-50"
@@ -208,6 +208,21 @@ export default function ProfilePage() {
                                             Edit Profile
                                         </>
                                     )}
+                                </Button>
+                                <Button
+                                    className="w-full"
+                                    variant="destructive"
+                                    onClick={async () => {
+                                        await authClient.signOut({
+                                            fetchOptions: {
+                                                onSuccess: () => {
+                                                    navigate('/auth')
+                                                }
+                                            }
+                                        })
+                                    }}
+                                >
+                                    Sign Out
                                 </Button>
                             </div>
                         </CardContent>

@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useRef, useState } from "react";
 
 type KeyPressContextType = {
     spacePressed: boolean;
@@ -14,25 +14,33 @@ export const KeyPressProvider = ({ children }: { children: React.ReactNode }) =>
     const [spacePressed, setSpacePressed] = useState(false);
     const [isHeld, setIsHeld] = useState(false);
 
-    useEffect(() => {
-        let holdTimeout: NodeJS.Timeout;
+    const holdTimeout = useRef<NodeJS.Timeout | null>(null);
+    const isKeyDownRef = useRef(false); // new ref to track actual key status
 
+    useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
-            if (e.code === "Space") {
-                if (!spacePressed) {
-                    setSpacePressed(true);
-                    holdTimeout = setTimeout(() => {
-                        setIsHeld(true); // consider it held after 500ms
-                    }, 500);
-                }
+            if (e.code === "Space" && !isKeyDownRef.current) {
+                isKeyDownRef.current = true;
+                setSpacePressed(true);
+
+                holdTimeout.current = setTimeout(() => {
+                    if (isKeyDownRef.current) {
+                        setIsHeld(true); // only set if still held
+                    }
+                }, 500);
             }
         };
 
         const handleKeyUp = (e: KeyboardEvent) => {
             if (e.code === "Space") {
+                isKeyDownRef.current = false;
                 setSpacePressed(false);
                 setIsHeld(false);
-                clearTimeout(holdTimeout);
+
+                if (holdTimeout.current) {
+                    clearTimeout(holdTimeout.current);
+                    holdTimeout.current = null;
+                }
             }
         };
 
@@ -42,8 +50,11 @@ export const KeyPressProvider = ({ children }: { children: React.ReactNode }) =>
         return () => {
             window.removeEventListener("keydown", handleKeyDown);
             window.removeEventListener("keyup", handleKeyUp);
+            if (holdTimeout.current) {
+                clearTimeout(holdTimeout.current);
+            }
         };
-    }, [spacePressed]);
+    }, []);
 
     return (
         <KeyPressContext.Provider value={{ spacePressed, isHeld }}>

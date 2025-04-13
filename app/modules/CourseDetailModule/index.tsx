@@ -1,10 +1,11 @@
 import { zodResolver } from "@hookform/resolvers/zod"
-import { Edit, FileText, MoreVertical, Pencil, Play, Plus, PlusCircle, Smile, Video } from "lucide-react"
+import { Edit, FileText, MoreVertical, Pencil, Play, Plus, PlusCircle, Smile, Trash, Video } from "lucide-react"
 import { useState } from "react"
 import { useForm } from "react-hook-form"
 import * as z from "zod"
 
 import { useLoaderData, useNavigate, useOutletContext } from "react-router"
+import { FileInput } from "~/components/elements/Dropzone"
 import { Button } from "~/components/ui/button"
 import {
     Dialog,
@@ -29,6 +30,7 @@ import type { userData } from "~/lib/auth-client"
 import { cn } from "~/lib/utils"
 import { courseTypeConfig } from "../CourseModule/const"
 import { addCourseItem, addCourseItemSchema, addSection, addSectionSchema, deleteCourseItem, deleteSection, editCourseSchema, updateCourse, type Course, type CourseItem } from "./const"
+import { toast } from "sonner"
 
 // Component for course item icon based on type
 const CourseItemIcon = ({ type, fileType }: { type: string; fileType?: string }) => {
@@ -127,12 +129,13 @@ export default function CourseDetail() {
 
             const result = await addCourseItem(selectedSectionId, values)
             if (result.success) {
+                toast.success("Course item added successfully")
                 setIsAddItemDialogOpen(false)
                 addCourseItemForm.reset()
-                // In a real app, you would refresh the course data here
+                navigate(`/courses/${course.id}`)
             }
         } catch (error) {
-            console.error("Failed to add course item:", error)
+            toast.error("Failed to add course item")
         }
     }
 
@@ -141,7 +144,9 @@ export default function CourseDetail() {
             const result = await updateCourse(course.id, values)
             if (result.success) {
                 setIsEditCourseDialogOpen(false)
-                // In a real app, you would refresh the course data here
+                editCourseForm.reset()
+                toast.success("Course updated successfully")
+                navigate(`/courses/${course.id}`)
             }
         } catch (error) {
             console.error("Failed to update course:", error)
@@ -152,7 +157,8 @@ export default function CourseDetail() {
         try {
             const result = await deleteSection(sectionId)
             if (result.success) {
-                // In a real app, you would refresh the course data here
+                toast.success("Section deleted successfully")
+                navigate(`/courses/${course.id}`)
             }
         } catch (error) {
             console.error("Failed to delete section:", error)
@@ -163,7 +169,8 @@ export default function CourseDetail() {
         try {
             const result = await deleteCourseItem(itemId)
             if (result.success) {
-                // In a real app, you would refresh the course data here
+                toast.success("Course item deleted successfully")
+                navigate(`/courses/${course.id}`)
             }
         } catch (error) {
             console.error("Failed to delete course item:", error)
@@ -189,10 +196,18 @@ export default function CourseDetail() {
                     <h1 className="text-3xl font-bold text-gray-800">Mata Pelajaran</h1>
 
                     {user.role === "teacher" && (
-                        <Button variant="outline" onClick={() => setIsEditCourseDialogOpen(true)}>
-                            <Edit className="h-4 w-4 mr-2" />
-                            Edit Course
-                        </Button>
+                        <div
+                            className="flex items-center gap-4"
+                        >
+                            <Button variant="outline" onClick={() => setIsEditCourseDialogOpen(true)}>
+                                <Edit className="h-4 w-4 mr-2" />
+                                Edit Course
+                            </Button>
+                            <Button>
+                                <Trash  className="h-4 w-4 mr-2" />
+                                Delete Course
+                            </Button>
+                        </div>
                     )}
                 </div>
 
@@ -472,12 +487,20 @@ export default function CourseDetail() {
 
                                     <FormField
                                         control={addCourseItemForm.control}
-                                        name="fileUrl"
-                                        render={({ field }) => (
+                                        name="file"
+                                        render={() => (
                                             <FormItem>
-                                                <FormLabel>File URL</FormLabel>
+                                                <FormLabel>File</FormLabel>
                                                 <FormControl>
-                                                    <Input placeholder="https://example.com/file.pdf" {...field} />
+                                                    <FileInput
+                                                        file={
+                                                            addCourseItemForm.getValues("file") as File | null
+                                                        }
+                                                        onFileChange={(file: File) => {
+                                                            addCourseItemForm.setValue("file", file as File)
+                                                        }}
+                                                        secondaryMessage="Upload Material File"
+                                                    />
                                                 </FormControl>
                                                 <FormMessage />
                                             </FormItem>

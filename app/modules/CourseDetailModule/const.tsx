@@ -33,14 +33,15 @@ const addSection = async (courseId: string, data: z.infer<typeof addSectionSchem
             ...data
         })
     })
+
+    if (!responseData) {
+        throw new Error("Failed to create section")
+    }
     
     return { success: true, id: "new-section-id" }
 }
 
 const addCourseItem = async (sectionId: string, data: z.infer<typeof addCourseItemSchema>) => {
-    console.log(`Adding item to section ${sectionId}:`, data)
-
-    // Upload to s3
     if (data.type === 'MATERIAL') {
         // Upload file into /api/upload
         const url = await uploadFileClient(
@@ -109,6 +110,27 @@ const updateCourse = async (courseId: string, data: z.infer<typeof editCourseSch
     return { success: true }
 }
 
+const updateSection = async (sectionId: string, data: z.infer<typeof addSectionSchema>) => {
+    const responseData = await fetchClient(`/course/section/${sectionId}`, {
+        method: "PUT",
+        body: JSON.stringify(data)
+    })
+    if (!responseData) {
+        throw new Error("Failed to update section")
+    }
+    return { success: true }
+}
+
+const deleteCourse = async (courseId: string) => {
+    const responseData = await fetchClient(`/course/${courseId}`, {
+        method: "DELETE",
+    })
+    if (!responseData) {
+        throw new Error("Failed to delete course")
+    }
+    return { success: true }
+}
+
 const deleteSection = async (sectionId: string) => {
     const responseData = await fetchClient(`/course/section/${sectionId}`, {
         method: "DELETE",
@@ -160,6 +182,7 @@ interface CourseItem extends Prisma.CourseItemGetPayload<{
     {}
 
 export {
-    addCourseItem, addCourseItemSchema, addSection, addSectionSchema, deleteCourseItem, deleteSection, editCourseSchema, updateCourse, type Course,
+    addCourseItem, addCourseItemSchema, addSection, addSectionSchema, deleteCourseItem, deleteSection, editCourseSchema, updateCourse, type Course, 
+    deleteCourse, updateSection,
     type CourseItem
 };

@@ -5,15 +5,18 @@ import { useForm } from "react-hook-form"
 import * as z from "zod"
 
 import { useLoaderData, useNavigate, useOutletContext } from "react-router"
+import { toast } from "sonner"
 import { FileInput } from "~/components/elements/Dropzone"
 import { Button } from "~/components/ui/button"
 import {
     Dialog,
+    DialogClose,
     DialogContent,
     DialogDescription,
     DialogFooter,
     DialogHeader,
     DialogTitle,
+    DialogTrigger,
 } from "~/components/ui/dialog"
 import {
     DropdownMenu,
@@ -29,8 +32,7 @@ import { Textarea } from "~/components/ui/textarea"
 import type { userData } from "~/lib/auth-client"
 import { cn } from "~/lib/utils"
 import { courseTypeConfig } from "../CourseModule/const"
-import { addCourseItem, addCourseItemSchema, addSection, addSectionSchema, deleteCourseItem, deleteSection, editCourseSchema, updateCourse, type Course, type CourseItem } from "./const"
-import { toast } from "sonner"
+import { addCourseItem, addCourseItemSchema, addSection, addSectionSchema, deleteCourse, deleteCourseItem, deleteSection, editCourseSchema, updateCourse, updateSection, type Course, type CourseItem } from "./const"
 
 // Component for course item icon based on type
 const CourseItemIcon = ({ type, fileType }: { type: string; fileType?: string }) => {
@@ -78,6 +80,7 @@ export default function CourseDetail() {
     const course: Course = useLoaderData();
 
     const [isAddSectionDialogOpen, setIsAddSectionDialogOpen] = useState(false)
+    const [isEditSectionDialogOpen, setisEditSectionDialogOpen] = useState(false)
     const [isAddItemDialogOpen, setIsAddItemDialogOpen] = useState(false)
     const [isEditCourseDialogOpen, setIsEditCourseDialogOpen] = useState(false)
     const [isItemDetailDialogOpen, setIsItemDetailDialogOpen] = useState(false)
@@ -89,6 +92,14 @@ export default function CourseDetail() {
     // Forms
     const addSectionForm = useForm<z.infer<typeof addSectionSchema>>({
         resolver: zodResolver(addSectionSchema),
+    })
+    
+    const editSectionForm = useForm<z.infer<typeof addSectionSchema>>({
+        resolver: zodResolver(addSectionSchema),
+        defaultValues: {
+            name: selectedSectionId ? course.CourseSection.find(section => section.id === selectedSectionId)?.name : "",
+            description: selectedSectionId ? course.CourseSection.find(section => section.id === selectedSectionId)?.description ?? "" : "",
+        },
     })
 
     const addCourseItemForm = useForm<z.infer<typeof addCourseItemSchema>>({
@@ -119,7 +130,21 @@ export default function CourseDetail() {
                 navigate(`/courses/${course.id}`)
             }
         } catch (error) {
-            console.error("Failed to add section:", error)
+            toast.error(`Failed to add section: ${error}`)
+        }
+    }
+
+    const onEditSectionSubmit = async (values: z.infer<typeof addSectionSchema>) => {
+        try {
+            if (!selectedSectionId) return
+            const result = await updateSection(selectedSectionId, values)
+            if (result.success) {
+                setisEditSectionDialogOpen(false)
+                editSectionForm.reset()
+                navigate(`/courses/${course.id}`)
+            }
+        } catch (error) {
+            toast.error(`Failed to edit section: ${error}`)
         }
     }
 
@@ -149,7 +174,7 @@ export default function CourseDetail() {
                 navigate(`/courses/${course.id}`)
             }
         } catch (error) {
-            console.error("Failed to update course:", error)
+            toast.error(`Failed to update course: ${error}`)
         }
     }
 
@@ -161,7 +186,7 @@ export default function CourseDetail() {
                 navigate(`/courses/${course.id}`)
             }
         } catch (error) {
-            console.error("Failed to delete section:", error)
+            toast.error(`Failed to delete section: ${error}` )
         }
     }
 
@@ -173,7 +198,7 @@ export default function CourseDetail() {
                 navigate(`/courses/${course.id}`)
             }
         } catch (error) {
-            console.error("Failed to delete course item:", error)
+            toast.error(`Failed to delete Course Item: ${error}`)
         }
     }
 
@@ -203,10 +228,42 @@ export default function CourseDetail() {
                                 <Edit className="h-4 w-4 mr-2" />
                                 Edit Course
                             </Button>
-                            <Button>
-                                <Trash  className="h-4 w-4 mr-2" />
-                                Delete Course
-                            </Button>
+                            <Dialog>
+                                <DialogTrigger asChild>
+                                    <Button
+                                        variant="destructive">
+                                        <Trash className="h-4 w-4 mr-2" />
+                                        Delete Course
+                                    </Button>
+                                </DialogTrigger>
+                                <DialogContent>
+                                    <DialogHeader>
+                                        <DialogTitle>Confirm Deletion</DialogTitle>
+                                        <DialogDescription>
+                                            Are you sure you want to delete this course? This action cannot be undone.
+                                        </DialogDescription>
+                                    </DialogHeader>
+                                    <DialogFooter>
+                                        <DialogClose asChild>
+                                            <Button variant="outline">
+                                                Cancel
+                                            </Button>
+                                        </DialogClose>
+                                        <Button variant="destructive" onClick={async () => {
+                                            // Handle course deletion logic here
+                                            const result = await deleteCourse(course.id)
+                                            if (!result.success) {
+                                                toast.error("Failed to delete course")
+                                                return
+                                            }
+                                            toast.success("Course deleted successfully")
+                                            navigate("/courses")
+                                        }}>
+                                            Delete
+                                        </Button>
+                                    </DialogFooter>
+                                </DialogContent>
+                            </Dialog>
                         </div>
                     )}
                 </div>
@@ -254,7 +311,12 @@ export default function CourseDetail() {
                                                 </Button>
                                             </DropdownMenuTrigger>
                                             <DropdownMenuContent align="end">
-                                                <DropdownMenuItem>Edit Section</DropdownMenuItem>
+                                                <DropdownMenuItem
+                                                    onClick={() => {
+                                                        setSelectedSectionId(section.id)
+                                                        setisEditSectionDialogOpen(true)
+                                                    }}
+                                                >Edit Section</DropdownMenuItem>
                                                 <DropdownMenuSeparator />
                                                 <DropdownMenuItem className="text-red-600" onClick={() => handleDeleteSection(section.id)}>
                                                     Delete Section
@@ -264,6 +326,56 @@ export default function CourseDetail() {
                                     </div>
                                 )}
                             </div>
+
+                            <Dialog
+                                open={isEditSectionDialogOpen}
+                                onOpenChange={setisEditSectionDialogOpen}
+                            >
+                                <DialogTrigger asChild>
+                                </DialogTrigger>
+                                <DialogContent>
+                                    <DialogHeader>
+                                        <DialogTitle>Edit Section</DialogTitle>
+                                        <DialogDescription>Create a new section for your course.</DialogDescription>
+                                    </DialogHeader>
+
+                                    <Form {...editSectionForm}>
+                                        <form onSubmit={editSectionForm.handleSubmit(onEditSectionSubmit)} className="space-y-4">
+                                            <FormField
+                                                control={editSectionForm.control}
+                                                name="name"
+                                                render={({ field }) => (
+                                                    <FormItem>
+                                                        <FormLabel>Section Name</FormLabel>
+                                                        <FormControl>
+                                                            <Input placeholder="e.g. Week 1" {...field} />
+                                                        </FormControl>
+                                                        <FormMessage />
+                                                    </FormItem>
+                                                )}
+                                            />
+
+                                            <FormField
+                                                control={editSectionForm.control}
+                                                name="description"
+                                                render={({ field }) => (
+                                                    <FormItem>
+                                                        <FormLabel>Description (Optional)</FormLabel>
+                                                        <FormControl>
+                                                            <Textarea placeholder="Brief description of this section" className="resize-none" {...field} />
+                                                        </FormControl>
+                                                        <FormMessage />
+                                                    </FormItem>
+                                                )}
+                                            />
+
+                                            <DialogFooter>
+                                                <Button type="submit">Edit Section</Button>
+                                            </DialogFooter>
+                                        </form>
+                                    </Form>
+                                </DialogContent>
+                            </Dialog>
 
                             {section.description && <p className="text-purple-700 mb-4">{section.description}</p>}
 
@@ -509,7 +621,7 @@ export default function CourseDetail() {
                                 </>
                             )}
 
-                            {itemType === "TASK" && (
+                            {(itemType === "TASK" || itemType === "QUIZ") && (
                                 <>
                                     <FormField
                                         control={addCourseItemForm.control}

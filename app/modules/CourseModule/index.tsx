@@ -8,7 +8,7 @@ import * as z from "zod"
 
 import type { COURSE_CATEGORY } from "@prisma/client"
 import { useState } from "react"
-import { Link, useLoaderData, useOutletContext } from "react-router"
+import { Link, useLoaderData, useNavigate, useOutletContext } from "react-router"
 import { Badge } from "~/components/ui/badge"
 import { Button } from "~/components/ui/button"
 import { Card, CardContent } from "~/components/ui/card"
@@ -96,6 +96,8 @@ export default function CourseManagement() {
         }
     }
 
+    const navigate = useNavigate()
+
     // Handle course creation
     const onCreateSubmit = async (values: z.infer<typeof createCourseSchema>) => {
         try {
@@ -109,6 +111,7 @@ export default function CourseManagement() {
                     setCreationStatus("idle")
                     createForm.reset()
                 }, 1500)
+                navigate(`/courses/${result.id}`)
             } else {
                 setCreationStatus("error")
             }

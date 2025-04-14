@@ -9,6 +9,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "~
 import { useKeyPress } from "~/hooks/useSpacePress"
 import useSpeakText from "~/hooks/useSpeakSpeech"
 import useVoiceRecorder from "~/hooks/useVoiceRecord"
+import { executeCommand } from "~/lib/command"
+import getPageContent from "~/lib/page-content"
 
 export default function VoiceIndicator() {
     const { isHeld } = useKeyPress()
@@ -33,7 +35,7 @@ export default function VoiceIndicator() {
 
             const beep = new Audio("/beep.mp3")
             console.log("beep");
-            
+
             beep.play().catch()
 
             sessionStorage.getItem("hasInteracted")
@@ -54,6 +56,8 @@ export default function VoiceIndicator() {
             const formData = new FormData()
             formData.append("audio", blob, "recording.wav")
 
+            formData.append("pageContent", getPageContent())
+
             // Send to your API endpoint
             const response = await fetch("/api/transcribe", {
                 method: "POST",
@@ -69,20 +73,25 @@ export default function VoiceIndicator() {
             setIsLoading(false)
 
             // Play the response audio if available
-            if (data.audioUrl) {
-                const audio = new Audio(data.audioUrl)
-
-                audio.play()
-            } else if (data.text) {
+            if (data.text) {
                 // Clean markdown text including *, _, and < > tags
                 const cleanedText = data.text
                     .replace(/\*/g, "")
                     .replace(/_/g, "")
                     .replace(/<[^>]+>/g, "")
-                
+
                 console.log(cleanedText);
-                
-                
+
+                // Get the first line of the response
+                const firstLine = cleanedText.split("\n")[0]
+                console.log("NIGG");
+
+                if (firstLine.startsWith("EXECCOMMAND")) {
+                    const command = cleanedText.replace("EXECCOMMAND", "").trim().split("\n")[0]
+
+                    return executeCommand(cleanedText.replace("EXECCOMMAND", "").trim(), speech)
+                }
+
                 // Speak the cleaned text
                 speech.speak(cleanedText)
             }
@@ -113,7 +122,7 @@ export default function VoiceIndicator() {
             stopRecording()
         }
     }, [isHeld])
-    
+
     // Handle microphone setup completion
     const handleSetupComplete = () => {
         completeMicrophoneSetup()

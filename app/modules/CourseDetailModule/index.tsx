@@ -215,7 +215,8 @@ export default function CourseDetail() {
     const config = courseTypeConfig[course.category]
 
     return (
-        <div className="min-h-screen bg-white">
+        <div
+            className="min-h-screen bg-white" >
             <div className="container mx-auto px-4 py-8">
                 <div className="flex justify-between items-center mb-8">
                     <h1 className="text-3xl font-bold text-gray-800">Mata Pelajaran</h1>
@@ -269,7 +270,9 @@ export default function CourseDetail() {
                 </div>
 
                 {/* Course Header Card */}
-                <div className={cn("rounded-xl p-6 mb-8", config.color)}>
+                <div className={cn("rounded-xl p-6 mb-8", config.color)}
+                    aria-description="content"
+                >
                     <div className="flex items-center gap-4">
                         <div className="p-4 bg-white/20 rounded-xl">{config.icon}</div>
 
@@ -291,7 +294,9 @@ export default function CourseDetail() {
                 </div>
 
                 {/* Course Sections */}
-                <div className="space-y-8">
+                <div className="space-y-8"
+                    aria-description="content"
+                >
                     {course.CourseSection.map((section) => (
                         <div key={section.id} className="rounded-xl bg-purple-100 p-6">
                             <div className="flex justify-between items-center mb-4">

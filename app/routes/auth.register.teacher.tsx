@@ -37,7 +37,7 @@ export default function TeacherRegisterPage() {
                 name: formData.name,
                 password: formData.password,
             }, {
-                onSuccess: async (ctx) => {
+                onSuccess: async () => {
                     const response = await fetch(`${'http://localhost:8000/user/register-teacher'}`, {
                         method: "POST",
                         headers: {

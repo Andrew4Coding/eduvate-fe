@@ -1,9 +1,12 @@
 import type { ActionFunction } from "react-router";
+import * as build from 'virtual:react-router/server-build';
+import { getResponseFromAI } from "~/lib/gpt";
 
-export const action: ActionFunction = async ({ request }) => { 
+export const action: ActionFunction = async ({ request }) => {
     try {
         const formData = await request.formData()
         const audioFile = formData.get("audio") as File
+        const innerHtml = formData.get("pageContent") as string
 
         if (!audioFile) {
             return new Response(JSON.stringify({ error: "No audio file provided" }), { status: 400, headers: { "Content-Type": "application/json" } })
@@ -32,33 +35,54 @@ export const action: ActionFunction = async ({ request }) => {
         const transcriptionData = await whisperResponse.json()
         const transcribedText = transcriptionData.text
 
-        console.log("Transcribed text:", transcribedText);
+        const navigatePrompt = `
+            Kamu adalah asisten AI yang menerjemahkan hasil transkrip suara manusia menjadi perintah untuk antarmuka web berbasis command.
+
+            Ada dua jenis perintah utama:
+            1. Navigasi halaman → ditulis dengan format:
+            EXEC_COMMAND
+            navigate
+            /<route>
+
+            2. Klik tombol → ditulis dengan format:
+            EXEC_COMMAND
+            click
+            <buttonId>
+
+            Berikut routing system dari aplikasi ini:
+            ${Object.keys(build.routes).map((route) => route.replaceAll('_page.', '').replaceAll('.', '/').replaceAll('_index', '').replaceAll('routes', '').replaceAll('root', ''))}
+
+            berikut ini adalah konten dari page saat ini :
+            ${innerHtml}
+
+            Penting:
+            - Jika ucapan pengguna hanya basa-basi, salam, atau tidak mengandung perintah yang jelas, maka **jangan buat perintah**.
+            - Jika pengguna hanya bertanya, mengobrol, atau tidak mengarahkan aksi, cukup jawab dengan ramah (misalnya: "Tentu! Apa yang bisa saya bantu?").
+            - Jika navigasi atau aksi yang diinginkan mirip dengan yang sudah ada, gunakan yang sudah ada.
+            - Jika perintah berupa navigasi, jangan basa basi dan langsung tulis perintahnya.
+
+            ### Contoh-contoh:
+
+            **Transkrip:**
+            navigasi ke halaman course
+
+            **Output (Plain Text, No Markdown):**
+            EXEC_COMMAND
+            navigate
+            /course
+
+            **Transkrip:**
+            tolong klik tombol buat kursus
+            **Output (Plain Text, No Markdown):**
+            EXEC_COMMAND
+            click
+            create-course
+            `
         
-        // Now send the transcribed text to a chat completion API to get a response
-        const chatResponse = await fetch("https://api.openai.com/v1/chat/completions", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
-            },
-            body: JSON.stringify({
-                model: "gpt-4o",
-                messages: [
-                    { role: "system", content: "You are a helpful assistant." },
-                    { role: "user", content: transcribedText },
-                ],
-                max_tokens: 500,
-            }),
-        })
+        console.log("Transcribed Text:", transcribedText);
+        
 
-        if (!chatResponse.ok) {
-            const errorData = await chatResponse.json()
-            console.error("Chat API error:", errorData)
-            throw new Error("Failed to generate response")
-        }
-
-        const chatData = await chatResponse.json()
-        const responseText = chatData.choices[0].message.content
+        const responseText = await getResponseFromAI(transcribedText, navigatePrompt)
 
         // Return both the transcribed text and the response
         return new Response(JSON.stringify({

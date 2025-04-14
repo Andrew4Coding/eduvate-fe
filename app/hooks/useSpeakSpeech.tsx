@@ -8,6 +8,16 @@ interface SpeechState {
     progress: number; // Progress percentage (0-100)
 }
 
+export interface UseSpeakTextType {
+    isSpeaking: boolean;
+    error: string;
+    text: string;
+    spokenText: string; // Text that has been spoken so far
+    progress: number; // Progress percentage (0-100)
+    speak: (text: string) => void;
+    stopSpeaking: () => void;
+}
+
 const useSpeakText = () => {
     const [state, setState] = useState<SpeechState>({
         isSpeaking: false,
@@ -158,7 +168,7 @@ const useSpeakText = () => {
         ...state,
         speak,
         stopSpeaking
-    };
+    } as UseSpeakTextType;
 };
 
 export default useSpeakText;

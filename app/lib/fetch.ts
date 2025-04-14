@@ -14,7 +14,9 @@ export const fetchClient = async (path: string, options: RequestInit = {}): Prom
             ...options.headers,
             'Content-Type': 'application/json',
             'Accept': 'application/json',
+            Cookie: document.cookie,
         },
+        credentials: 'include',
     });
 
     try {

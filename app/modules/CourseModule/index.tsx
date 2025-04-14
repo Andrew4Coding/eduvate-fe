@@ -134,12 +134,11 @@ export default function CourseManagement() {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {courses.map((course) => {
-                        console.log(course);
-                        
                         const config = courseTypeConfig[course.category]
 
                         return (
                             <Card
+                                aria-description="content"
                                 key={course.id}
                                 className={cn("rounded-xl overflow-hidden transition-transform hover:scale-[1.02]")}
                             >
@@ -187,7 +186,9 @@ export default function CourseManagement() {
                     })}
 
                     {!courses.length && (
-                        <div className="col-span-1 md:col-span-2 lg:col-span-3 flex flex-col items-center justify-center py-16 space-y-4">
+                        <div
+                            aria-description="content"
+                            className="col-span-1 md:col-span-2 lg:col-span-3 flex flex-col items-center justify-center py-16 space-y-4">
                             <Smile className="h-16 w-16 text-gray-400 mb-4" />
                             <div className="text-center">
                                 <p className="text-gray-500">No courses available.</p>

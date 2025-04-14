@@ -9,7 +9,7 @@ export async function quizProgressLoader(args: LoaderFunctionArgs) {
   if (!user) return redirect("/auth");
 
   // only student filter
-//   if (user.role !== "student") return redirect("/");
+  //   if (user.role !== "student") return redirect("/");
 
   const quiz = await prisma.quiz.findUnique({
     where: {
@@ -27,13 +27,34 @@ export async function quizProgressLoader(args: LoaderFunctionArgs) {
       QuizSubmission: {
         where: {
           student: {
-            id: user.id,
+            userId: user.id,
           },
         },
         include: {
           QuizSubmissionAnswer: true,
         },
         take: 1,
+      },
+    },
+  });
+
+  if (!quiz) return redirect("/");
+
+  // submission
+  await prisma.student.update({
+    where: {
+      userId: user.id,
+    },
+    data: {
+      QuizSubmission: {
+        create: {
+          quiz: {
+            connect: {
+              id: quiz.id,
+            },
+          },
+          score: 0,
+        },
       },
     },
   });

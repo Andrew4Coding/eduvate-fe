@@ -24,7 +24,7 @@ export const auth = betterAuth({
 
             const student = await prisma.student.findFirst({
                 where: {
-                    userId: user.id,
+                    id: user.id,
                 },
                 select: {
                     id: true,

@@ -6,6 +6,9 @@ export interface Quiz
   extends Prisma.QuizGetPayload<{
     include: {
       QuizQuestion: {
+        include: {
+          QuizQuestionChoice: true,
+        },
         omit: {
           answer: true;
         };

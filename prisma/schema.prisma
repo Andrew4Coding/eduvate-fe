@@ -169,14 +169,14 @@ model QuizQuestion {
   quizId               String
   quiz                 Quiz                   @relation(fields: [quizId], references: [id])
   QuizSubmissionAnswer QuizSubmissionAnswer[]
-  QuizQuestionChoice QuizQuestionChoice[]
+  QuizQuestionChoice   QuizQuestionChoice[]
 }
 
 model QuizQuestionChoice {
-  id String @id @default(cuid())
-  text String
+  id             String       @id @default(cuid())
+  text           String
   quizQuestionId String
-  quizQuestion QuizQuestion @relation(fields: [quizQuestionId], references: [id])
+  quizQuestion   QuizQuestion @relation(fields: [quizQuestionId], references: [id])
 }
 
 model QuizSubmission {

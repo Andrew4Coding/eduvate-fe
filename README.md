@@ -1,87 +1,62 @@
-# Welcome to React Router!
+# EduVate
 
-A modern, production-ready template for building full-stack React applications using React Router.
-
-[![Open in StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz.svg)](https://stackblitz.com/github/remix-run/react-router-templates/tree/main/default)
-
-## Features
-
-- 🚀 Server-side rendering
-- ⚡️ Hot Module Replacement (HMR)
-- 📦 Asset bundling and optimization
-- 🔄 Data loading and mutations
-- 🔒 TypeScript by default
-- 🎉 TailwindCSS for styling
-- 📖 [React Router docs](https://reactrouter.com/)
-
-## Getting Started
-
-### Installation
-
-Install the dependencies:
-
-```bash
-npm install
-```
-
-### Development
-
-Start the development server with HMR:
-
-```bash
-npm run dev
-```
-
-Your application will be available at `http://localhost:5173`.
-
-## Building for Production
-
-Create a production build:
-
-```bash
-npm run build
-```
-
-## Deployment
-
-### Docker Deployment
-
-To build and run using Docker:
-
-```bash
-docker build -t my-app .
-
-# Run the container
-docker run -p 3000:3000 my-app
-```
-
-The containerized application can be deployed to any platform that supports Docker, including:
-
-- AWS ECS
-- Google Cloud Run
-- Azure Container Apps
-- Digital Ocean App Platform
-- Fly.io
-- Railway
-
-### DIY Deployment
-
-If you're familiar with deploying Node applications, the built-in app server is production-ready.
-
-Make sure to deploy the output of `npm run build`
-
-```
-├── package.json
-├── package-lock.json (or pnpm-lock.yaml, or bun.lockb)
-├── build/
-│   ├── client/    # Static assets
-│   └── server/    # Server-side code
-```
-
-## Styling
-
-This template comes with [Tailwind CSS](https://tailwindcss.com/) already configured for a simple default starting experience. You can use whatever CSS framework you prefer.
+*Universitas Indonesia*  
+*Anggota Tim:*  
+- Andrew Devito Aryo (Ilmu Komputer, 2306152494) – andrew.devito@ui.ac.id  
+- Carleano Ravelza Wongso (Ilmu Komputer, 2306213022) – carleano.ravelza@ui.ac.id  
+- Clara Aurelia Setiady (Sistem Informasi, 2306217304) – clara.aurelia@ui.ac.id  
 
 ---
 
-Built with ❤️ using React Router.
+## 🎯 Tujuan Aplikasi
+
+EduVate bertujuan untuk *mewujudkan pembelajaran yang efektif, efisien, dan inklusif* bagi siswa disabilitas, khususnya tuna netra, dengan memanfaatkan teknologi *Generative AI*. Aplikasi ini berfokus pada pemenuhan hak pendidikan inklusif sesuai dengan UU Nomor 8 Tahun 2016 serta menjawab tantangan kurangnya guru pendamping khusus, keterbatasan SLB, dan kurangnya inovasi teknologi pendidikan untuk penyandang disabilitas.
+
+---
+
+## 🌟 Fitur Utama
+
+1. *AI Teaching Assistant (EDU)*  
+   Asisten belajar berbasis suara yang siap membantu siswa belajar, mengingatkan tugas, menjawab pertanyaan akademik, memberikan motivasi harian, dan masih banyak lagi.
+
+2. *Multimodal LMS*  
+   Sistem pembelajaran berbasis audio-visual yang dapat diakses tanpa sentuhan (hands-free), memungkinkan siswa tuna netra belajar melalui audio dan kontrol suara.
+
+3. *Hand-Free Quiz*  
+   Siswa dapat menjawab kuis cukup dengan suara, tanpa perlu mengetik. Soal dibacakan dan jawaban dinilai secara otomatis.
+
+4. *AI Quiz Checker*  
+   Pemeriksaan kuis otomatis berbasis AI yang memberikan insight langsung terhadap hasil kuis dan membantu evaluasi personalisasi.
+
+5. *Dashboard Pembelajaran*  
+   Tampilan terintegrasi yang bisa dikontrol dengan suara, menampilkan progres belajar, tugas yang harus dikerjakan, dan laporan performa akademik.
+
+---
+
+## 💡 Mengapa EduVate?
+
+- *Inklusif dan Adaptif:* Dirancang untuk menjangkau siswa disabilitas agar mereka dapat belajar secara mandiri.
+- *Efisiensi untuk Sekolah dan Guru:* Mengurangi beban administratif dan pengajaran manual.
+- *Teknologi yang Membumi:* Mengintegrasikan AI secara praktis dan relevan dalam pendidikan.
+
+---
+
+## 🧰 Teknologi yang Digunakan
+
+- *Frontend Framework:* Remix  
+- *Design System:* Tailwind CSS  
+- *Database:* PostgreSQL  
+- *AI & LLM:* ChatGPT & custom LLM framework  
+- *Design Tools:* Figma  
+
+---
+
+## 📣 Kutipan Inspiratif
+
+> “Learning is no longer limited by disability, but enhanced by inclusivity.”
+
+---
+
+## 📬 Kontak
+
+Untuk informasi lebih lanjut, hubungi salah satu anggota tim melalui email yang tercantum di atas.

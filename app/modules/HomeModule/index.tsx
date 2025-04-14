@@ -8,7 +8,7 @@ export default function HomePage() {
                 Halo! Apa yang bisa aku bantu?
             </h1>
             <h3 className="text-s6 md:text-s4 font-medium text-violet-600 mt-2">
-                Tekan tombol Spasi atau langsung katakan <span className="text-h4 md:text-h2 font-bold">“HI EDU”</span>
+                Tekan tombol Spasi dan langsung katakan <span className="text-h4 md:text-h2 font-bold">“HI EDU”</span>
             </h3>
 
             <div

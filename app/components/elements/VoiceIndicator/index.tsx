@@ -84,7 +84,6 @@ export default function VoiceIndicator() {
 
                 // Get the first line of the response
                 const firstLine = cleanedText.split("\n")[0]
-                console.log("NIGG");
 
                 if (firstLine.startsWith("EXECCOMMAND")) {
                     const command = cleanedText.replace("EXECCOMMAND", "").trim().split("\n")[0]

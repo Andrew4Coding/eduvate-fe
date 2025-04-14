@@ -11,7 +11,7 @@ function navigateToRouteWithAI(route: string, speech: UseSpeakTextType) {
         window.history.pushState({ path: newUrl }, '', newUrl);
         window.dispatchEvent(new PopStateEvent('popstate', { state: { path: newUrl } }));
 
-        speech.speak(`Navigasi ke ${path.replaceAll('/', '')} berhasil`)
+        speech.speak(`Navigasi berhasil`)
     }
 }
 

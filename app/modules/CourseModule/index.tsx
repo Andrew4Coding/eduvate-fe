@@ -269,16 +269,6 @@ export default function CourseManagement() {
                         </Dialog>
                     ) : (
                         <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-                                <DialogTrigger asChild>
-                                    {
-                                        !courses.length 
-                                        &&
-                                        <Button>
-                                            <PlusCircle className="mr-2 h-4 w-4" />
-                                            Create Course
-                                        </Button>
-                                    }
-                            </DialogTrigger>
                             <DialogContent className="sm:max-w-[525px]">
                                 <DialogHeader>
                                     <DialogTitle>Create a New Course</DialogTitle>

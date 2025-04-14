@@ -66,6 +66,13 @@ const useSpeakText = () => {
         fullTextRef.current = text;
         charIndexRef.current = 0;
 
+        // Split text into chunks of 50 words
+        const words = text.split(" ");
+        const chunks = [];
+        for (let i = 0; i < words.length; i += 50) {
+            chunks.push(words.slice(i, i + 50).join(" "));
+        }
+
         // Update state with the new text
         setState(prev => ({
             ...prev,
@@ -88,67 +95,79 @@ const useSpeakText = () => {
             clearSpeechInterval();
         }
 
-        const utterance = new SpeechSynthesisUtterance(text);
-        utterance.lang = "id-ID";
-        utterance.rate = 1.1; // Slightly faster for a more lively tone
-        utterance.pitch = 1.1; // Higher pitch for a friendlier and funnier sound
-        utteranceRef.current = utterance;
-
-        // Set up event handlers
-        utterance.onstart = () => {
-            setState(prev => ({ ...prev, isSpeaking: true }));
-
-            // Set up an interval to simulate progressive text display
-            clearSpeechInterval();
-
-            // Estimate speaking time based on text length and rate
-            // This is an approximation - actual speech timing varies
-            const totalChars = text.length;
-            const estimatedDuration = (totalChars / 15) * 1000; // ~15 chars per second
-            const updateInterval = 50; // Update every 50ms for smooth animation
-            const charsPerInterval = totalChars / (estimatedDuration / updateInterval);
-
-            intervalRef.current = setInterval(() => {
-                charIndexRef.current = Math.min(charIndexRef.current + charsPerInterval, totalChars);
-                const progress = (charIndexRef.current / totalChars) * 100;
-                const currentText = text.substring(0, Math.floor(charIndexRef.current));
-
+        const speakChunk = (chunkIndex: number) => {
+            if (chunkIndex >= chunks.length) {
+                // All chunks have been spoken
                 setState(prev => ({
                     ...prev,
-                    spokenText: currentText,
-                    progress
+                    isSpeaking: false,
+                    spokenText: fullTextRef.current, // Show full text at the end
+                    progress: 100
                 }));
-
-                if (charIndexRef.current >= totalChars) {
-                    clearSpeechInterval();
-                }
-            }, updateInterval);
-        };
-
-        utterance.onend = () => {
-            setState(prev => ({
-                ...prev,
-                isSpeaking: false,
-                spokenText: text, // Show full text at the end
-                progress: 100
-            }));
-            clearSpeechInterval();
-        };
-
-        utterance.onerror = (event) => {
-            // If event error is not interrupted
-            if (event.error === "interrupted") {
+                clearSpeechInterval();
                 return;
             }
-            setState(prev => ({
-                ...prev,
-                error: `Speech synthesis error: ${event.error}`,
-                isSpeaking: false
-            }));
-            clearSpeechInterval();
+
+            const chunk = chunks[chunkIndex];
+            const utterance = new SpeechSynthesisUtterance(chunk);
+            utterance.lang = "id-ID";
+            utterance.rate = 1.1; // Slightly faster for a more lively tone
+            utterance.pitch = 1.1; // Higher pitch for a friendlier and funnier sound
+            utteranceRef.current = utterance;
+
+            // Set up event handlers
+            utterance.onstart = () => {
+                setState(prev => ({ ...prev, isSpeaking: true }));
+
+                // Set up an interval to simulate progressive text display
+                clearSpeechInterval();
+
+                // Estimate speaking time based on text length and rate
+                const totalChars = chunk.length;
+                const estimatedDuration = (totalChars / 15) * 1000; // ~15 chars per second
+                const updateInterval = 50; // Update every 50ms for smooth animation
+                const charsPerInterval = totalChars / (estimatedDuration / updateInterval);
+
+                intervalRef.current = setInterval(() => {
+                    charIndexRef.current = Math.min(charIndexRef.current + charsPerInterval, totalChars);
+                    const progress = ((chunkIndex * 50 + charIndexRef.current) / words.length) * 100;
+                    const currentText = fullTextRef.current.substring(0, Math.floor(chunkIndex * 50 + charIndexRef.current));
+
+                    setState(prev => ({
+                        ...prev,
+                        spokenText: currentText,
+                        progress
+                    }));
+
+                    if (charIndexRef.current >= totalChars) {
+                        clearSpeechInterval();
+                    }
+                }, updateInterval);
+            };
+
+            utterance.onend = () => {
+                // Speak the next chunk
+                speakChunk(chunkIndex + 1);
+            };
+
+            utterance.onerror = (event) => {
+                // If event error is not interrupted
+                if (event.error === "interrupted") {
+                    return;
+                }
+                setState(prev => ({
+                    ...prev,
+                    error: `Speech synthesis error: ${event.error}`,
+                    isSpeaking: false
+                }));
+                clearSpeechInterval();
+            };
+
+            synth.speak(utterance);
         };
 
-        synth.speak(utterance);
+        // Start speaking the first chunk
+        speakChunk(0);
     };
 
     const stopSpeaking = () => {

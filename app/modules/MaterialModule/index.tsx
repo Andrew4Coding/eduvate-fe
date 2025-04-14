@@ -8,6 +8,7 @@ import { useLoaderData } from "react-router"
 import useSpeakText from "~/hooks/useSpeakSpeech"
 import { Badge } from "~/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs"
+import { useKeyPress } from "~/hooks/useSpacePress"
 
 interface TranscriptSegment {
     id: string
@@ -23,8 +24,6 @@ export default function MaterialViewerModule() {
         }
     }> = useLoaderData()
 
-    console.log(loaderData);
-
     const speech = useSpeakText()
 
     const [isPlaying, setIsPlaying] = useState(false)
@@ -39,24 +38,6 @@ export default function MaterialViewerModule() {
 
     const audioRef = useRef<HTMLAudioElement>(null)
     const transcriptRef = useRef<HTMLDivElement>(null)
-
-
-    // Parse transcript from the transcripted field if available
-    useEffect(() => {
-        if (loaderData.transcripted) {
-            try {
-                const parsedTranscript = JSON.parse(loaderData.transcripted)
-                if (Array.isArray(parsedTranscript)) {
-                    setTranscript(parsedTranscript)
-                }
-            } catch (error) {
-                console.error("Error parsing transcript:", error)
-                setTranscript([])
-            }
-        } else {
-            setTranscript([])
-        }
-    }, [loaderData.transcripted])
 
     // Handle spacebar for play/pause
     useEffect(() => {
@@ -132,15 +113,50 @@ export default function MaterialViewerModule() {
         audio.playbackRate = currentSpeed
     }, [currentSpeed])
 
+
+    const { isHeld } = useKeyPress();
+
+    useEffect(() => {
+        if (isHeld) {
+            setIsPlaying(false)
+        }
+    }, [isHeld])
+
     const togglePlayPause = () => {
         const audio = audioRef.current
         if (!audio) return
 
+        if (isHeld) {
+            return
+        }
+
         if (isPlaying) {
             speech.stopSpeaking()
         } else {
-            speech.speak(loaderData.transcripted)
-        }
+            console.log("Playing audio");
+
+            console.log("Audio URL:", loaderData.transcripted);
+            
+            const words = loaderData.transcripted.split(" ");
+            const chunkSize = 50;
+            const chunks = [];
+
+            for (let i = 0; i < words.length; i += chunkSize) {
+                chunks.push(words.slice(i, i + chunkSize).join(" "));
+            }
+
+            let currentChunkIndex = 0;
+
+            const speakChunks = () => {
+                if (currentChunkIndex < chunks.length) {
+                    speech.speak(chunks[currentChunkIndex], () => {
+                        currentChunkIndex++;
+                        speakChunks();
+                    });
+                }
+            };
+
+            speakChunks();}
         setIsPlaying(!isPlaying)
     }
 
@@ -148,10 +164,6 @@ export default function MaterialViewerModule() {
         if (speech.isSpeaking) {
             speech.stopSpeaking()
         } else {
-            // Get all transcript text combined
-            const fullText = transcript.map(segment => segment.text).join(" ")
-            console.log("hello");
-
             speech.speak(loaderData.transcripted)
         }
     }

@@ -9,7 +9,7 @@ export async function getResponseFromAI(prompt: string, context?: string): Promi
         body: JSON.stringify({
             model: "gpt-4o",
             messages: [
-                { role: "system", content: "You are a helpful assistant." },
+                { role: "system", content: "Nama kamu adalah Edu, sebuah asisten aplikasi belajar bagi orang tunanetra berbahasa indonesia, gunakan bahasa yang fun dan menyemangati, jelaskan setiap penjalasan secara singkat padat namun jelas, dan gunakan bahasa yang mudah dimengerti" },
                 ...(context ? [{ role: "assistant", content: context }] : []),
                 { role: "user", content: prompt },
             ],

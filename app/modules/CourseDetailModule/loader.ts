@@ -4,7 +4,7 @@ import { redirect, type LoaderFunctionArgs } from "react-router";
 export default async function courseDetailLoader(args: LoaderFunctionArgs) {
     const id = args.params.id;
 
-    const course = await prisma.course.findUnique({
+    const course = await prisma.course.findFirst({
         where: {
             id: id,
         },
@@ -24,7 +24,7 @@ export default async function courseDetailLoader(args: LoaderFunctionArgs) {
     })
 
     if (!course) {
-        return redirect('/404');
+        return redirect('/');
     }
 
     return course;

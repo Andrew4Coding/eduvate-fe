@@ -5,19 +5,18 @@ import QuestionDisplay from "./question-display"
 import NavigationButtons from "./navigation-button"
 import QuestionGrid from "./question-grid"
 import Timer from "./timer"
-import { quizData } from "../data/quiz-data"
-import { fetchClient } from "~/lib/fetch"
+import { type Quiz } from '../index'
 
-export default function QuizContainer() {
+export default function QuizContainer({ quiz }: { quiz: Quiz }) {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0)
-  const [userAnswers, setUserAnswers] = useState<(string | null)[]>(Array(quizData.length).fill(null))
-  const [timeRemaining, setTimeRemaining] = useState(30 * 60) // 30 minutes in seconds
-  const [quizCompleted, setQuizCompleted] = useState(false)
+  const [userAnswers, setUserAnswers] = useState<(string | null)[]>([]);
+  const [timeRemaining, setTimeRemaining] = useState(30 * 60); // 30 minutes in seconds
+  const [quizCompleted, setQuizCompleted] = useState(false);
 
   const handleAnswerSelect = (answerId: string) => {
-    const newAnswers = [...userAnswers]
-    newAnswers[currentQuestionIndex] = answerId
-    setUserAnswers(newAnswers)
+    const newAnswers = [...userAnswers];
+    newAnswers[currentQuestionIndex] = answerId;
+    setUserAnswers(newAnswers);
   }
 
   const handlePrevious = () => {
@@ -27,7 +26,7 @@ export default function QuizContainer() {
   }
 
   const handleNext = () => {
-    if (currentQuestionIndex < quizData.length - 1) {
+    if (currentQuestionIndex < quiz.QuizQuestion.length - 1) {
       setCurrentQuestionIndex(currentQuestionIndex + 1)
     }
   }
@@ -44,26 +43,25 @@ export default function QuizContainer() {
     setQuizCompleted(true)
   }
 
-  // Calculate score when quiz is completed
-  const calculateScore = () => {
-    let score = 0
-    userAnswers.forEach((answer, index) => {
-      if (answer === quizData[index].correctAnswer) {
-        score++
-      }
-    })
-    return score
-  }
-
   useEffect(() => {
-    const res = fetchClient('/quiz/${id}', )
+    const userAnswers = quiz.QuizSubmission[0].QuizSubmissionAnswer;
+    
+    const orderedUserAnswers = Array(quiz.QuizQuestion.length).fill(null);
+    const questionIds = quiz.QuizQuestion.map(question => question.id);
+    
+    userAnswers.forEach(ans => {
+      let idx = questionIds.indexOf(ans.id);
+      orderedUserAnswers[idx] = ans.id;
+    });
+
+    setUserAnswers([...orderedUserAnswers]);
   }, [])
 
   return (
     <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-md p-6">
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-xl font-semibold">
-          Question {currentQuestionIndex + 1} of {quizData.length}
+          Question {currentQuestionIndex + 1} of {quiz.QuizQuestion.length}
         </h2>
         <Timer
           timeRemaining={timeRemaining}
@@ -76,7 +74,7 @@ export default function QuizContainer() {
       {!quizCompleted ? (
         <>
           <QuestionDisplay
-            question={quizData[currentQuestionIndex]}
+            question={quiz.QuizQuestion[currentQuestionIndex]}
             selectedAnswer={userAnswers[currentQuestionIndex]}
             onAnswerSelect={handleAnswerSelect}
           />

@@ -3,9 +3,16 @@
 import { RadioGroup, RadioGroupItem } from "~/components/ui/radio-group"
 import { Label } from "~/components/ui/label"
 import type { QuizQuestion } from "~/modules/QuizProgressModule/data/quiz-data"
+import type { Prisma } from "@prisma/client"
+
+interface QuizQuestion extends Prisma.QuizGetPayload<{
+  include: {
+    
+  }
+}> {}
 
 interface QuestionDisplayProps {
-  question: QuizQuestion
+  question: 
   selectedAnswer: string | null
   onAnswerSelect: (answerId: string) => void
 }

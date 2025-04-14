@@ -11,7 +11,7 @@ import { fetchClient } from "~/lib/fetch";
 export default function QuizContainer({ quiz }: { quiz: Quiz }) {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [userAnswers, setUserAnswers] = useState<(string | null)[]>([]);
-  const [timeRemaining, setTimeRemaining] = useState(30 * 60); // 30 minutes in seconds
+  const [timeRemaining, setTimeRemaining] = useState(quiz.duration * 60); // 30 minutes in seconds
   const [quizCompleted, setQuizCompleted] = useState(false);
 
   const handleAnswerSelect = (answerId: string) => {
@@ -51,7 +51,7 @@ export default function QuizContainer({ quiz }: { quiz: Quiz }) {
   };
 
   useEffect(() => {
-    const userAnswers = quiz.QuizSubmission[0].QuizSubmissionAnswer;
+    const userAnswers = quiz.QuizSubmission[0] ? quiz.QuizSubmission[0].QuizSubmissionAnswer : [];
 
     const orderedUserAnswers = Array(quiz.QuizQuestion.length).fill(null);
     const questionIds = quiz.QuizQuestion.map((question) => question.id);
@@ -83,7 +83,6 @@ export default function QuizContainer({ quiz }: { quiz: Quiz }) {
           selectedAnswer={userAnswers[currentQuestionIndex]}
           onAnswerSelect={handleAnswerSelect}
         />
-
         <NavigationButtons
           currentQuestionIndex={currentQuestionIndex}
           totalQuestions={quiz.QuizQuestion.length}
@@ -103,7 +102,6 @@ export default function QuizContainer({ quiz }: { quiz: Quiz }) {
           />
         </div>
       </>
-      )
     </div>
   );
 }

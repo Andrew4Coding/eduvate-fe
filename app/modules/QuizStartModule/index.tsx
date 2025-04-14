@@ -15,10 +15,12 @@ import {
 interface Quiz
   extends Prisma.QuizGetPayload<{
     select: {
+      id: true;
       title: true;
       description: true;
-      closeDate: true;
       openDate: true;
+      dueDate: true;
+      duration: true;
       _count: {
         select: {
           QuizQuestion: true;
@@ -28,16 +30,14 @@ interface Quiz
   }> {}
 
 export default function QuizStartModule() {
-  const user = useOutletContext();
   const quiz: Quiz = useLoaderData();
-  const timeDelta = (quiz.closeDate?.getTime() - quiz.openDate.getTime())
 
   return (
     <div className="container flex items-center justify-center min-h-screen py-12">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-bold">{quiz.title}</CardTitle>
-          <CardDescription>{quiz.description}</CardDescription>
+          <CardTitle className="text-2xl font-bold">{quiz?.title}</CardTitle>
+          <CardDescription>{quiz?.description}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex items-start space-x-3">
@@ -45,7 +45,7 @@ export default function QuizStartModule() {
             <div>
               <p className="font-medium">Total Questions</p>
               <p className="text-sm text-muted-foreground">
-                {quiz._count.QuizQuestion} multiple-choice questions
+                {quiz?._count.QuizQuestion} multiple-choice questions
               </p>
             </div>
           </div>
@@ -55,7 +55,7 @@ export default function QuizStartModule() {
             <div>
               <p className="font-medium">Time Limit</p>
               <p className="text-sm text-muted-foreground">
-                {quiz.} minutes to complete the quiz
+                {quiz.duration} minutes to complete the quiz
               </p>
             </div>
           </div>
@@ -73,8 +73,8 @@ export default function QuizStartModule() {
           </div>
         </CardContent>
         <CardFooter>
-          <a href="/quiz/end" className="w-full">
-            <Button className="w-full" size="lg">
+          <a href={`/quiz/progress/${quiz?.id}`} className="w-full">
+            <Button className="w-full cursor-pointer" size="lg">
               Start Quiz
               <ArrowRight className="ml-2 h-4 w-4" />
             </Button>

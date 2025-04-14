@@ -146,9 +146,9 @@ model Quiz {
   id             String           @id @default(cuid())
   title          String
   description    String?
-  openDate       DateTime        @default(now())
+  openDate       DateTime         @default(now())
+  duration       Int
   dueDate        DateTime
-  closeDate      DateTime
   createdAt      DateTime         @default(now())
   updatedAt      DateTime         @updatedAt
   courseItemId   String           @unique
@@ -161,7 +161,6 @@ model QuizQuestion {
   id                   String                 @id @default(cuid())
   question             String
   answer               String
-  type                 QUESTION_TYPE
   isHidden             Boolean                @default(false)
   options              String[]
   explanation          String?
@@ -374,11 +373,4 @@ enum FILE_TYPE {
   VIDEO
   AUDIO
   PPT
-}
-
-enum QUESTION_TYPE {
-  MULTIPLE_CHOICE
-  TRUE_FALSE
-  SHORT_ANSWER
-  LONG_ANSWER
 }

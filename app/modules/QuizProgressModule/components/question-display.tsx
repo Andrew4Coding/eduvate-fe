@@ -24,7 +24,7 @@ export default function QuestionDisplay({ question, selectedAnswer, onAnswerSele
     <div className="mb-8">
       <h3 className="text-lg font-medium mb-4">{question.question}</h3>
       <RadioGroup value={selectedAnswer || ""} onValueChange={onAnswerSelect} className="space-y-3">
-        {question.options.map((option: any) => (
+        {question.QuizQuestionChoice.map((option: any) => (
           <div
             key={option.id}
             className={`flex items-center space-x-2 rounded-lg border p-4 transition-colors ${

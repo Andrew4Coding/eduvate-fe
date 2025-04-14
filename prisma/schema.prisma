@@ -144,9 +144,11 @@ model Material {
 
 model Quiz {
   id             String           @id @default(cuid())
-  openDate       DateTime?        @default(now())
-  dueDate        DateTime?
-  closeDate      DateTime?
+  title          String
+  description    String?
+  openDate       DateTime        @default(now())
+  dueDate        DateTime
+  closeDate      DateTime
   createdAt      DateTime         @default(now())
   updatedAt      DateTime         @updatedAt
   courseItemId   String           @unique

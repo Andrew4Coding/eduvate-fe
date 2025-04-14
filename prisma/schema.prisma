@@ -136,6 +136,7 @@ model Material {
   id           String     @id @default(cuid())
   fileUrl      String
   fileType     FILE_TYPE
+  transcripted String
   createdAt    DateTime   @default(now())
   updatedAt    DateTime   @updatedAt
   courseItemId String     @unique

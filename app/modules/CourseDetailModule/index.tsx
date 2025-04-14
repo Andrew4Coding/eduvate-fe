@@ -1,8 +1,8 @@
 import { zodResolver } from "@hookform/resolvers/zod"
-import { Edit, FileText, MoreVertical, Pencil, Play, Plus, PlusCircle, Smile, Trash, Video } from "lucide-react"
+import { Edit, FileText, MoreVertical, Pencil, Play, Plus, PlusCircle, Smile, Trash } from "lucide-react"
 import { useState } from "react"
 import { useForm } from "react-hook-form"
-import * as z from "zod"
+import type * as z from "zod"
 
 import { useLoaderData, useNavigate, useOutletContext } from "react-router"
 import { toast } from "sonner"
@@ -32,7 +32,20 @@ import { Textarea } from "~/components/ui/textarea"
 import type { userData } from "~/lib/auth-client"
 import { cn } from "~/lib/utils"
 import { courseTypeConfig } from "../CourseModule/const"
-import { addCourseItem, addCourseItemSchema, addSection, addSectionSchema, deleteCourse, deleteCourseItem, deleteSection, editCourseSchema, updateCourse, updateSection, type Course, type CourseItem } from "./const"
+import {
+    addCourseItem,
+    addCourseItemSchema,
+    addSection,
+    addSectionSchema,
+    deleteCourse,
+    deleteCourseItem,
+    deleteSection,
+    editCourseSchema,
+    updateCourse,
+    updateSection,
+    type Course,
+    type CourseItem,
+} from "./const"
 
 // Component for course item icon based on type
 const CourseItemIcon = ({ type, fileType }: { type: string; fileType?: string }) => {
@@ -75,9 +88,8 @@ const CourseItemIcon = ({ type, fileType }: { type: string; fileType?: string })
 }
 
 export default function CourseDetail() {
-
-    const user: userData = useOutletContext();
-    const course: Course = useLoaderData();
+    const user: userData = useOutletContext()
+    const course: Course = useLoaderData()
 
     const [isAddSectionDialogOpen, setIsAddSectionDialogOpen] = useState(false)
     const [isEditSectionDialogOpen, setisEditSectionDialogOpen] = useState(false)
@@ -87,18 +99,20 @@ export default function CourseDetail() {
     const [selectedSectionId, setSelectedSectionId] = useState<string | null>(null)
     const [selectedItem, setSelectedItem] = useState<CourseItem | null>(null)
 
-    const navigate = useNavigate();
+    const navigate = useNavigate()
 
     // Forms
     const addSectionForm = useForm<z.infer<typeof addSectionSchema>>({
         resolver: zodResolver(addSectionSchema),
     })
-    
+
     const editSectionForm = useForm<z.infer<typeof addSectionSchema>>({
         resolver: zodResolver(addSectionSchema),
         defaultValues: {
-            name: selectedSectionId ? course.CourseSection.find(section => section.id === selectedSectionId)?.name : "",
-            description: selectedSectionId ? course.CourseSection.find(section => section.id === selectedSectionId)?.description ?? "" : "",
+            name: selectedSectionId ? course.CourseSection.find((section) => section.id === selectedSectionId)?.name : "",
+            description: selectedSectionId
+                ? (course.CourseSection.find((section) => section.id === selectedSectionId)?.description ?? "")
+                : "",
         },
     })
 
@@ -152,12 +166,14 @@ export default function CourseDetail() {
         try {
             if (!selectedSectionId) return
 
+            setIsLoading(true)
             const result = await addCourseItem(selectedSectionId, values)
             if (result.success) {
                 toast.success("Course item added successfully")
                 setIsAddItemDialogOpen(false)
                 addCourseItemForm.reset()
                 navigate(`/courses/${course.id}`)
+                setIsLoading(false)
             }
         } catch (error) {
             toast.error("Failed to add course item")
@@ -186,7 +202,7 @@ export default function CourseDetail() {
                 navigate(`/courses/${course.id}`)
             }
         } catch (error) {
-            toast.error(`Failed to delete section: ${error}` )
+            toast.error(`Failed to delete section: ${error}`)
         }
     }
 
@@ -212,27 +228,36 @@ export default function CourseDetail() {
         setIsItemDetailDialogOpen(true)
     }
 
+    // Function to navigate to the appropriate route based on item type
+    const navigateToItemPage = (item: CourseItem) => {
+        if (item.type === "MATERIAL" && item.Material) {
+            navigate(`/materials/${item.id}`)
+        } else if (item.type === "QUIZ" && item.Quiz) {
+            navigate(`/quizzes/${item.id}`)
+        } else if (item.type === "TASK" && item.Task) {
+            navigate(`/tasks/${item.id}`)
+        }
+    }
+
     const config = courseTypeConfig[course.category]
 
+    const [isLoading, setIsLoading] = useState(false)
+
     return (
-        <div
-            className="min-h-screen bg-white" >
+        <div className="min-h-screen bg-white">
             <div className="container mx-auto px-4 py-8">
                 <div className="flex justify-between items-center mb-8">
                     <h1 className="text-3xl font-bold text-gray-800">Mata Pelajaran</h1>
 
                     {user.role === "teacher" && (
-                        <div
-                            className="flex items-center gap-4"
-                        >
+                        <div className="flex items-center gap-4">
                             <Button variant="outline" onClick={() => setIsEditCourseDialogOpen(true)}>
                                 <Edit className="h-4 w-4 mr-2" />
                                 Edit Course
                             </Button>
                             <Dialog>
                                 <DialogTrigger asChild>
-                                    <Button
-                                        variant="destructive">
+                                    <Button variant="destructive">
                                         <Trash className="h-4 w-4 mr-2" />
                                         Delete Course
                                     </Button>
@@ -246,20 +271,21 @@ export default function CourseDetail() {
                                     </DialogHeader>
                                     <DialogFooter>
                                         <DialogClose asChild>
-                                            <Button variant="outline">
-                                                Cancel
-                                            </Button>
+                                            <Button variant="outline">Cancel</Button>
                                         </DialogClose>
-                                        <Button variant="destructive" onClick={async () => {
-                                            // Handle course deletion logic here
-                                            const result = await deleteCourse(course.id)
-                                            if (!result.success) {
-                                                toast.error("Failed to delete course")
-                                                return
-                                            }
-                                            toast.success("Course deleted successfully")
-                                            navigate("/courses")
-                                        }}>
+                                        <Button
+                                            variant="destructive"
+                                            onClick={async () => {
+                                                // Handle course deletion logic here
+                                                const result = await deleteCourse(course.id)
+                                                if (!result.success) {
+                                                    toast.error("Failed to delete course")
+                                                    return
+                                                }
+                                                toast.success("Course deleted successfully")
+                                                navigate("/courses")
+                                            }}
+                                        >
                                             Delete
                                         </Button>
                                     </DialogFooter>
@@ -270,9 +296,7 @@ export default function CourseDetail() {
                 </div>
 
                 {/* Course Header Card */}
-                <div className={cn("rounded-xl p-6 mb-8", config.color)}
-                    aria-description="content"
-                >
+                <div className={cn("rounded-xl p-6 mb-8", config.color)} aria-description="content">
                     <div className="flex items-center gap-4">
                         <div className="p-4 bg-white/20 rounded-xl">{config.icon}</div>
 
@@ -294,9 +318,7 @@ export default function CourseDetail() {
                 </div>
 
                 {/* Course Sections */}
-                <div className="space-y-8"
-                    aria-description="content"
-                >
+                <div className="space-y-8" aria-description="content">
                     {course.CourseSection.map((section) => (
                         <div key={section.id} className="rounded-xl bg-purple-100 p-6">
                             <div className="flex justify-between items-center mb-4">
@@ -304,7 +326,12 @@ export default function CourseDetail() {
 
                                 {user.role === "teacher" && (
                                     <div className="flex items-center gap-2">
-                                        <Button variant="ghost" size="sm" onClick={() => openAddItemDialog(section.id)}>
+                                        <Button
+                                            disabled={isLoading}
+                                            variant="ghost"
+                                            size="sm"
+                                            onClick={() => openAddItemDialog(section.id)}
+                                        >
                                             <PlusCircle className="h-4 w-4 mr-2" />
                                             Add Item
                                         </Button>
@@ -321,7 +348,9 @@ export default function CourseDetail() {
                                                         setSelectedSectionId(section.id)
                                                         setisEditSectionDialogOpen(true)
                                                     }}
-                                                >Edit Section</DropdownMenuItem>
+                                                >
+                                                    Edit Section
+                                                </DropdownMenuItem>
                                                 <DropdownMenuSeparator />
                                                 <DropdownMenuItem className="text-red-600" onClick={() => handleDeleteSection(section.id)}>
                                                     Delete Section
@@ -332,12 +361,8 @@ export default function CourseDetail() {
                                 )}
                             </div>
 
-                            <Dialog
-                                open={isEditSectionDialogOpen}
-                                onOpenChange={setisEditSectionDialogOpen}
-                            >
-                                <DialogTrigger asChild>
-                                </DialogTrigger>
+                            <Dialog open={isEditSectionDialogOpen} onOpenChange={setisEditSectionDialogOpen}>
+                                <DialogTrigger asChild></DialogTrigger>
                                 <DialogContent>
                                     <DialogHeader>
                                         <DialogTitle>Edit Section</DialogTitle>
@@ -367,7 +392,11 @@ export default function CourseDetail() {
                                                     <FormItem>
                                                         <FormLabel>Description (Optional)</FormLabel>
                                                         <FormControl>
-                                                            <Textarea placeholder="Brief description of this section" className="resize-none" {...field} />
+                                                            <Textarea
+                                                                placeholder="Brief description of this section"
+                                                                className="resize-none"
+                                                                {...field}
+                                                            />
                                                         </FormControl>
                                                         <FormMessage />
                                                     </FormItem>
@@ -390,7 +419,7 @@ export default function CourseDetail() {
                                     <div
                                         key={item.id}
                                         className="bg-white rounded-xl p-4 shadow-sm cursor-pointer hover:shadow-md transition-shadow"
-                                        onClick={() => openItemDetailDialog(item)}
+                                        onClick={() => navigateToItemPage(item)}
                                     >
                                         <div className="flex items-center gap-4">
                                             <CourseItemIcon type={item.type} fileType={item.Material?.fileType} />
@@ -408,7 +437,21 @@ export default function CourseDetail() {
                                                         </Button>
                                                     </DropdownMenuTrigger>
                                                     <DropdownMenuContent align="end">
-                                                        <DropdownMenuItem>Edit Item</DropdownMenuItem>
+                                                        <DropdownMenuItem
+                                                            onClick={(e) => {
+                                                                e.stopPropagation()
+                                                                // Navigate to edit page based on item type
+                                                                if (item.type === "MATERIAL") {
+                                                                    navigate(`/materials/${item.id}/edit`)
+                                                                } else if (item.type === "QUIZ") {
+                                                                    navigate(`/quizzes/${item.id}/edit`)
+                                                                } else if (item.type === "TASK") {
+                                                                    navigate(`/tasks/${item.id}/edit`)
+                                                                }
+                                                            }}
+                                                        >
+                                                            Edit Item
+                                                        </DropdownMenuItem>
                                                         <DropdownMenuSeparator />
                                                         <DropdownMenuItem
                                                             className="text-red-600"
@@ -431,7 +474,12 @@ export default function CourseDetail() {
                                         No items in this section yet.
                                         {user.role === "teacher" && (
                                             <div className="mt-2">
-                                                <Button variant="outline" size="sm" onClick={() => openAddItemDialog(section.id)}>
+                                                <Button
+                                                    disabled={isLoading}
+                                                    variant="outline"
+                                                    size="sm"
+                                                    onClick={() => openAddItemDialog(section.id)}
+                                                >
                                                     <Plus className="h-4 w-4 mr-2" />
                                                     Add Item
                                                 </Button>
@@ -610,9 +658,7 @@ export default function CourseDetail() {
                                                 <FormLabel>File</FormLabel>
                                                 <FormControl>
                                                     <FileInput
-                                                        file={
-                                                            addCourseItemForm.getValues("file") as File | null
-                                                        }
+                                                        file={addCourseItemForm.getValues("file") as File | null}
                                                         onFileChange={(file: File) => {
                                                             addCourseItemForm.setValue("file", file as File)
                                                         }}
@@ -672,7 +718,9 @@ export default function CourseDetail() {
                                 </>
                             )}
                             <DialogFooter>
-                                <Button type="submit">Add Item</Button>
+                                <Button disabled={isLoading} type="submit">
+                                    Add Item
+                                </Button>
                             </DialogFooter>
                         </form>
                     </Form>
@@ -721,91 +769,6 @@ export default function CourseDetail() {
                             </DialogFooter>
                         </form>
                     </Form>
-                </DialogContent>
-            </Dialog>
-
-            {/* Item Detail Dialog */}
-            <Dialog open={isItemDetailDialogOpen} onOpenChange={setIsItemDetailDialogOpen}>
-                <DialogContent className="sm:max-w-[600px]">
-                    {selectedItem && (
-                        <>
-                            <DialogHeader>
-                                <DialogTitle>{selectedItem.name}</DialogTitle>
-                                {selectedItem.description && <DialogDescription>{selectedItem.description}</DialogDescription>}
-                            </DialogHeader>
-
-                            <div className="space-y-4">
-                                {selectedItem.type === "MATERIAL" && selectedItem.Material && (
-                                    <div className="space-y-4">
-                                        <div className="flex items-center gap-2">
-                                            <span className="font-medium">Type:</span>
-                                            <span>{selectedItem.Material.fileType}</span>
-                                        </div>
-
-                                        {selectedItem.Material.fileType === "VIDEO" && (
-                                            <div className="aspect-video bg-gray-100 rounded-lg flex items-center justify-center">
-                                                <Video className="h-12 w-12 text-gray-400" />
-                                            </div>
-                                        )}
-
-                                        {selectedItem.Material.fileType === "PDF" && (
-                                            <div className="p-4 border rounded-lg">
-                                                <FileText className="h-12 w-12 text-gray-400 mx-auto mb-2" />
-                                                <p className="text-center text-sm text-gray-500">PDF Document</p>
-                                            </div>
-                                        )}
-
-                                        <Button className="w-full" asChild>
-                                            <a href={selectedItem.Material.fileUrl} target="_blank" rel="noopener noreferrer">
-                                                View Material
-                                            </a>
-                                        </Button>
-                                    </div>
-                                )}
-
-                                {selectedItem.type === "QUIZ" && (
-                                    <div className="space-y-4">
-                                        <p className="text-gray-600">This is a quiz. Click the button below to start.</p>
-
-                                        <Button className="w-full">Start Quiz</Button>
-                                    </div>
-                                )}
-
-                                {selectedItem.type === "TASK" && selectedItem.Task && (
-                                    <div className="space-y-4">
-                                        {(selectedItem.Task.openDate || selectedItem.Task.dueDate || selectedItem.Task.closeDate) && (
-                                            <div className="space-y-2 p-4 bg-gray-50 rounded-lg">
-                                                {selectedItem.Task.openDate && (
-                                                    <div className="flex justify-between">
-                                                        <span className="text-gray-600">Opens:</span>
-                                                        <span className="font-medium">{new Date(selectedItem.Task.openDate).toLocaleString()}</span>
-                                                    </div>
-                                                )}
-
-                                                {selectedItem.Task.dueDate && (
-                                                    <div className="flex justify-between">
-                                                        <span className="text-gray-600">Due:</span>
-                                                        <span className="font-medium">{new Date(selectedItem.Task.dueDate).toLocaleString()}</span>
-                                                    </div>
-                                                )}
-
-                                                {selectedItem.Task.closeDate && (
-                                                    <div className="flex justify-between">
-                                                        <span className="text-gray-600">Closes:</span>
-                                                        <span className="font-medium">
-                                                            {new Date(selectedItem.Task.closeDate).toLocaleString()}
-                                                        </span>
-                                                    </div>
-                                                )}
-                                            </div>
-                                        )}
-
-                                        <Button className="w-full">{user.role === "student" ? "Submit Task" : "View Submissions"}</Button>
-                                    </div>
-                                )}
-                            </div>
-                        </>
-                    )}
                 </DialogContent>
             </Dialog>
         </div>

@@ -1,5 +1,3 @@
-"use client";
-
 import { useEffect, useState } from "react";
 import QuestionDisplay from "./question-display";
 import NavigationButtons from "./navigation-button";

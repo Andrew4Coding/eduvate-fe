@@ -130,6 +130,29 @@ export default function CourseManagement() {
             <div className="container mx-auto px-4 py-8">
                 <div className="flex justify-between items-center mb-8">
                     <h1 className="text-3xl font-bold text-gray-800">Courses</h1>
+                    <Button
+                        variant="outline"
+                        className="flex items-center"
+                        onClick={() => {
+                            if (user.role === "student") {
+                                setIsEnrollDialogOpen(true)
+                            } else {
+                                setIsCreateDialogOpen(true)
+                            }
+                        }}
+                    >
+                        {user.role === "student" ? (
+                            <div className="flex items-center">
+                                <PlusCircle className="mr-2 h-4 w-4" />
+                                Enroll in Course
+                            </div>
+                        ) : (
+                            <div className="flex items-center">
+                                <PlusCircle className="mr-2 h-4 w-4" />
+                                Create Course
+                            </div>
+                        )}
+                    </Button>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -177,7 +200,7 @@ export default function CourseManagement() {
                                             >
                                                 <Button className="w-full">View Details</Button>
                                             </Link>
-                                                
+
                                         </div>
                                     </div>
                                 </CardContent>
@@ -198,168 +221,176 @@ export default function CourseManagement() {
                                     <p className="text-gray-500">Create your first course to get started.</p>
                                 )}
                             </div>
-                            {user.role === "student" ? (
-                                <Dialog open={isEnrollDialogOpen} onOpenChange={setIsEnrollDialogOpen}>
-                                    <DialogTrigger asChild>
-                                        <Button>Enroll in Course</Button>
-                                    </DialogTrigger>
-                                    <DialogContent>
-                                        <DialogHeader>
-                                            <DialogTitle>Enroll in a Course</DialogTitle>
-                                            <DialogDescription>Enter the course code provided by your teacher to enroll.</DialogDescription>
-                                        </DialogHeader>
+                        </div>
+                    )}
 
-                                        <Form {...enrollForm}>
-                                            <form onSubmit={enrollForm.handleSubmit(onEnrollSubmit)} className="space-y-4">
-                                                <FormField
-                                                    control={enrollForm.control}
-                                                    name="courseCode"
-                                                    render={({ field }) => (
-                                                        <FormItem>
-                                                            <FormLabel>Course Code</FormLabel>
-                                                            <FormControl>
-                                                                <Input placeholder="Enter course code" {...field} />
-                                                            </FormControl>
-                                                            <FormMessage />
-                                                        </FormItem>
-                                                    )}
-                                                />
+                    {user.role === "student" ? (
+                        <Dialog open={isEnrollDialogOpen} onOpenChange={setIsEnrollDialogOpen}>
+                            <DialogTrigger asChild>
+                                {
 
-                                                <DialogFooter>
-                                                    <Button type="submit" disabled={enrollmentStatus === "loading"}>
-                                                        {enrollmentStatus === "loading"
-                                                            ? "Enrolling..."
-                                                            : enrollmentStatus === "success"
-                                                                ? "Enrolled!"
-                                                                : "Enroll"}
-                                                    </Button>
-                                                </DialogFooter>
-                                            </form>
-                                        </Form>
-                                    </DialogContent>
-                                </Dialog>
-                            ) : (
-                                <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-                                    <DialogTrigger asChild>
+                                }
+                                <Button>Enroll in Course</Button>
+                            </DialogTrigger>
+                            <DialogContent>
+                                <DialogHeader>
+                                    <DialogTitle>Enroll in a Course</DialogTitle>
+                                    <DialogDescription>Enter the course code provided by your teacher to enroll.</DialogDescription>
+                                </DialogHeader>
+
+                                <Form {...enrollForm}>
+                                    <form onSubmit={enrollForm.handleSubmit(onEnrollSubmit)} className="space-y-4">
+                                        <FormField
+                                            control={enrollForm.control}
+                                            name="courseCode"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel>Course Code</FormLabel>
+                                                    <FormControl>
+                                                        <Input placeholder="Enter course code" {...field} />
+                                                    </FormControl>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
+
+                                        <DialogFooter>
+                                            <Button type="submit" disabled={enrollmentStatus === "loading"}>
+                                                {enrollmentStatus === "loading"
+                                                    ? "Enrolling..."
+                                                    : enrollmentStatus === "success"
+                                                        ? "Enrolled!"
+                                                        : "Enroll"}
+                                            </Button>
+                                        </DialogFooter>
+                                    </form>
+                                </Form>
+                            </DialogContent>
+                        </Dialog>
+                    ) : (
+                        <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+                                <DialogTrigger asChild>
+                                    {
+                                        !courses.length 
+                                        &&
                                         <Button>
                                             <PlusCircle className="mr-2 h-4 w-4" />
                                             Create Course
                                         </Button>
-                                    </DialogTrigger>
-                                    <DialogContent className="sm:max-w-[525px]">
-                                        <DialogHeader>
-                                            <DialogTitle>Create a New Course</DialogTitle>
-                                            <DialogDescription>Fill in the details to create a new course for your students.</DialogDescription>
-                                        </DialogHeader>
+                                    }
+                            </DialogTrigger>
+                            <DialogContent className="sm:max-w-[525px]">
+                                <DialogHeader>
+                                    <DialogTitle>Create a New Course</DialogTitle>
+                                    <DialogDescription>Fill in the details to create a new course for your students.</DialogDescription>
+                                </DialogHeader>
 
-                                        <Form {...createForm}>
-                                            <form onSubmit={createForm.handleSubmit(onCreateSubmit)} className="space-y-4">
-                                                <FormField
-                                                    control={createForm.control}
-                                                    name="name"
-                                                    render={({ field }) => (
-                                                        <FormItem>
-                                                            <FormLabel>Course Name</FormLabel>
-                                                            <FormControl>
-                                                                <Input placeholder="e.g. Advanced Mathematics" {...field} />
-                                                            </FormControl>
-                                                            <FormMessage />
-                                                        </FormItem>
-                                                    )}
-                                                />
+                                <Form {...createForm}>
+                                    <form onSubmit={createForm.handleSubmit(onCreateSubmit)} className="space-y-4">
+                                        <FormField
+                                            control={createForm.control}
+                                            name="name"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel>Course Name</FormLabel>
+                                                    <FormControl>
+                                                        <Input placeholder="e.g. Advanced Mathematics" {...field} />
+                                                    </FormControl>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
 
-                                                <FormField
-                                                    control={createForm.control}
-                                                    name="code"
-                                                    render={({ field }) => (
-                                                        <FormItem>
-                                                            <FormLabel>Course Code</FormLabel>
-                                                            <FormControl>
-                                                                <Input placeholder="e.g. MATH101" {...field} />
-                                                            </FormControl>
-                                                            <FormDescription>Students will use this code to enroll in your course.</FormDescription>
-                                                            <FormMessage />
-                                                        </FormItem>
-                                                    )}
-                                                />
+                                        <FormField
+                                            control={createForm.control}
+                                            name="code"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel>Course Code</FormLabel>
+                                                    <FormControl>
+                                                        <Input placeholder="e.g. MATH101" {...field} />
+                                                    </FormControl>
+                                                    <FormDescription>Students will use this code to enroll in your course.</FormDescription>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
 
-                                                <FormField
-                                                    control={createForm.control}
-                                                    name="description"
-                                                    render={({ field }) => (
-                                                        <FormItem>
-                                                            <FormLabel>Description (Optional)</FormLabel>
-                                                            <FormControl>
-                                                                <Textarea
-                                                                    placeholder="Brief description of the course"
-                                                                    className="resize-none"
-                                                                    {...field}
-                                                                />
-                                                            </FormControl>
-                                                            <FormMessage />
-                                                        </FormItem>
-                                                    )}
-                                                />
+                                        <FormField
+                                            control={createForm.control}
+                                            name="description"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel>Description (Optional)</FormLabel>
+                                                    <FormControl>
+                                                        <Textarea
+                                                            placeholder="Brief description of the course"
+                                                            className="resize-none"
+                                                            {...field}
+                                                        />
+                                                    </FormControl>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
 
-                                                <FormField
-                                                    control={createForm.control}
-                                                    name="category"
-                                                    render={({ field }) => (
-                                                        <FormItem>
-                                                            <FormLabel>Category</FormLabel>
-                                                            <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                                                <FormControl>
-                                                                    <SelectTrigger>
-                                                                        <SelectValue placeholder="Select a category" />
-                                                                    </SelectTrigger>
-                                                                </FormControl>
-                                                                <SelectContent>
-                                                                    {Object.entries(courseTypeConfig).map(([key, config]) => (
-                                                                        <SelectItem key={key} value={key}>
-                                                                            <div className="flex items-center">
-                                                                                <div className={`w-3 h-3 rounded-full mr-2 ${config.color}`}></div>
-                                                                                {config.label}
-                                                                            </div>
-                                                                        </SelectItem>
-                                                                    ))}
-                                                                </SelectContent>
-                                                            </Select>
-                                                            <FormMessage />
-                                                        </FormItem>
-                                                    )}
-                                                />
+                                        <FormField
+                                            control={createForm.control}
+                                            name="category"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel>Category</FormLabel>
+                                                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                                        <FormControl>
+                                                            <SelectTrigger>
+                                                                <SelectValue placeholder="Select a category" />
+                                                            </SelectTrigger>
+                                                        </FormControl>
+                                                        <SelectContent>
+                                                            {Object.entries(courseTypeConfig).map(([key, config]) => (
+                                                                <SelectItem key={key} value={key}>
+                                                                    <div className="flex items-center">
+                                                                        <div className={`w-3 h-3 rounded-full mr-2 ${config.color}`}></div>
+                                                                        {config.label}
+                                                                    </div>
+                                                                </SelectItem>
+                                                            ))}
+                                                        </SelectContent>
+                                                    </Select>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
 
-                                                <FormField
-                                                    control={createForm.control}
-                                                    name="isHidden"
-                                                    render={({ field }) => (
-                                                        <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
-                                                            <div className="space-y-0.5">
-                                                                <FormLabel>Hidden Course</FormLabel>
-                                                                <FormDescription>Hide this course from the course listing</FormDescription>
-                                                            </div>
-                                                            <FormControl>
-                                                                <Switch checked={field.value} onCheckedChange={field.onChange} />
-                                                            </FormControl>
-                                                        </FormItem>
-                                                    )}
-                                                />
+                                        <FormField
+                                            control={createForm.control}
+                                            name="isHidden"
+                                            render={({ field }) => (
+                                                <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
+                                                    <div className="space-y-0.5">
+                                                        <FormLabel>Hidden Course</FormLabel>
+                                                        <FormDescription>Hide this course from the course listing</FormDescription>
+                                                    </div>
+                                                    <FormControl>
+                                                        <Switch checked={field.value} onCheckedChange={field.onChange} />
+                                                    </FormControl>
+                                                </FormItem>
+                                            )}
+                                        />
 
-                                                <DialogFooter>
-                                                    <Button type="submit" disabled={creationStatus === "loading"}>
-                                                        {creationStatus === "loading"
-                                                            ? "Creating..."
-                                                            : creationStatus === "success"
-                                                                ? "Created!"
-                                                                : "Create Course"}
-                                                    </Button>
-                                                </DialogFooter>
-                                            </form>
-                                        </Form>
-                                    </DialogContent>
-                                </Dialog>
-                            )}
-                        </div>
+                                        <DialogFooter>
+                                            <Button type="submit" disabled={creationStatus === "loading"}>
+                                                {creationStatus === "loading"
+                                                    ? "Creating..."
+                                                    : creationStatus === "success"
+                                                        ? "Created!"
+                                                        : "Create Course"}
+                                            </Button>
+                                        </DialogFooter>
+                                    </form>
+                                </Form>
+                            </DialogContent>
+                        </Dialog>
                     )}
                 </div>
             </div>

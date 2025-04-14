@@ -226,7 +226,7 @@ export default function VoiceIndicator() {
                 >
                     <Mic />
                     {isHeld && (
-                        <motion.div
+                    <motion.div
                             className="flex space-x-1 mt-2"
                             initial={{ opacity: 0 }}
                             animate={{ opacity: [0, 1, 0] }}

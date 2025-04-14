@@ -1,7 +1,9 @@
 import type { Prisma } from "@prisma/client";
+import pdfToText from 'react-pdftotext';
 import { z } from "zod";
 import { fetchClient } from "~/lib/fetch";
 import uploadFileClient from "~/lib/file";
+import { getResponseFromAI } from "~/lib/gpt";
 const addSectionSchema = z.object({
     name: z.string().min(1, "Section name is required"),
     description: z.string().optional(),
@@ -17,6 +19,7 @@ const addCourseItemSchema = z.object({
     openDate: z.string().optional(),
     dueDate: z.string().optional(),
     closeDate: z.string().optional(),
+    extractedText: z.string().optional(),
 })
 
 const editCourseSchema = z.object({
@@ -30,33 +33,35 @@ const addSection = async (courseId: string, data: z.infer<typeof addSectionSchem
         method: "POST",
         body: JSON.stringify({
             courseId,
-            ...data
-        })
+            ...data,
+        }),
     })
 
     if (!responseData) {
         throw new Error("Failed to create section")
     }
-    
+
     return { success: true, id: "new-section-id" }
 }
 
 const addCourseItem = async (sectionId: string, data: z.infer<typeof addCourseItemSchema>) => {
-    if (data.type === 'MATERIAL') {
+    if (data.type === "MATERIAL") {
         // Upload file into /api/upload
-        const url = await uploadFileClient(
-            data.file as File,
-            data.file!.name,
-            data.fileType as string
-        )
+        const url = await uploadFileClient(data.file as File, data.file!.name, data.fileType as string)
 
-        const responseData = fetchClient("/material/create", {
+        let extractedText = ""
+
+        const text = await pdfToText(data.file as File)
+
+        const responseData = await fetchClient("/material/create", {
             method: "POST",
             body: JSON.stringify({
                 courseSectionId: sectionId,
                 ...data,
-                fileUrl: url.url
-            })
+                transcripted: text,
+                fileUrl: url.url,
+                extractedText,
+            }),
         })
 
         if (!responseData) {
@@ -64,14 +69,13 @@ const addCourseItem = async (sectionId: string, data: z.infer<typeof addCourseIt
         }
 
         return { success: true, id: "new-item-id" }
-    }
-    else if (data.type === 'QUIZ') {
+    } else if (data.type === "QUIZ") {
         const responseData = fetchClient("/quiz/create", {
             method: "POST",
             body: JSON.stringify({
                 courseSectionId: sectionId,
-                ...data
-            })
+                ...data,
+            }),
         })
 
         if (!responseData) {
@@ -79,15 +83,13 @@ const addCourseItem = async (sectionId: string, data: z.infer<typeof addCourseIt
         }
 
         return { success: true, id: "new-item-id" }
-    }
-
-    else if (data.type === 'TASK') {
+    } else if (data.type === "TASK") {
         const responseData = fetchClient("/task/create", {
             method: "POST",
             body: JSON.stringify({
                 courseSectionId: sectionId,
-                ...data
-            })
+                ...data,
+            }),
         })
         if (!responseData) {
             throw new Error("Failed to upload file")
@@ -102,7 +104,7 @@ const addCourseItem = async (sectionId: string, data: z.infer<typeof addCourseIt
 const updateCourse = async (courseId: string, data: z.infer<typeof editCourseSchema>) => {
     const responseData = await fetchClient(`/course/${courseId}`, {
         method: "PUT",
-        body: JSON.stringify(data)
+        body: JSON.stringify(data),
     })
     if (!responseData) {
         throw new Error("Failed to update course")
@@ -113,7 +115,7 @@ const updateCourse = async (courseId: string, data: z.infer<typeof editCourseSch
 const updateSection = async (sectionId: string, data: z.infer<typeof addSectionSchema>) => {
     const responseData = await fetchClient(`/course/section/${sectionId}`, {
         method: "PUT",
-        body: JSON.stringify(data)
+        body: JSON.stringify(data),
     })
     if (!responseData) {
         throw new Error("Failed to update section")
@@ -153,7 +155,8 @@ const deleteCourseItem = async (itemId: string) => {
     return { success: true }
 }
 
-interface Course extends Prisma.CourseGetPayload<{
+interface Course
+    extends Prisma.CourseGetPayload<{
         include: {
             CourseSection: {
                 include: {
@@ -163,26 +166,35 @@ interface Course extends Prisma.CourseGetPayload<{
                             Quiz: true
                             Task: true
                         }
-                    }   
+                    }
                 }
             }
         }
-}>
-{
+    }> {
     progress: number
 }
 
-interface CourseItem extends Prisma.CourseItemGetPayload<{
-    include: {
-        Material: true
-        Quiz: true
-        Task: true
-    }
-}>
-    {}
+interface CourseItem
+    extends Prisma.CourseItemGetPayload<{
+        include: {
+            Material: true
+            Quiz: true
+            Task: true
+        }
+    }> { }
 
 export {
-    addCourseItem, addCourseItemSchema, addSection, addSectionSchema, deleteCourseItem, deleteSection, editCourseSchema, updateCourse, type Course, 
-    deleteCourse, updateSection,
+    addCourseItem,
+    addCourseItemSchema,
+    addSection,
+    addSectionSchema,
+    deleteCourse,
+    deleteCourseItem,
+    deleteSection,
+    editCourseSchema,
+    updateCourse,
+    updateSection,
+    type Course,
     type CourseItem
 };
+

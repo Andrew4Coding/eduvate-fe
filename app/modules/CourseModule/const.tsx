@@ -101,15 +101,21 @@ const createCourseSchema = z.object({
 // Mock function to enroll in a course
 const enrollInCourse = async (courseCode: string) => {
     console.log(`Enrolling in course with code: ${courseCode}`)
-    // In a real app, this would make an API call to enroll the student
-    return { success: true }
+    const responseData = await fetchClient("/api/course/enroll", {
+        method: "POST",
+        body: JSON.stringify({ courseCode })
+    })
+
+    return { 
+        success: responseData.data.error !== true
+     }
 }
 
 // Mock function to create a course
 const createCourse = async (courseData: z.infer<typeof createCourseSchema>) => {
     console.log("Creating course:", courseData)
 
-    const responseData = await fetchClient("/course", {
+    const responseData = await fetchClient("/api/course", {
         method: "POST",
         body: JSON.stringify(courseData)
     })
@@ -117,12 +123,9 @@ const createCourse = async (courseData: z.infer<typeof createCourseSchema>) => {
     console.log(responseData);
     
 
-    return { success: true, id: "new-course-id" }
+    return { success: true, id: responseData.data.data.id }
 }
 
 export {
-    enrollCourseSchema,
-    createCourseSchema,
-    enrollInCourse,
-    createCourse,
-}
+    createCourse, createCourseSchema, enrollCourseSchema, enrollInCourse
+};

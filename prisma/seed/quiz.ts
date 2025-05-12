@@ -3,14 +3,6 @@ import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
 async function main() {
-  const school = await prisma.school.create({
-    data: {
-      code: "ABCDED",
-      name: "SMA Harapan Bangsa",
-      address: "Jl. Kebangsaan No.123",
-    },
-  });
-
   const teacherUser = await prisma.user.create({
     data: {
       name: "Ibu Sari",
@@ -23,7 +15,6 @@ async function main() {
   const teacher = await prisma.teacher.create({
     data: {
       userId: teacherUser.id,
-      schoolId: school.id,
     },
   });
 
@@ -39,7 +30,6 @@ async function main() {
   const student = await prisma.student.create({
     data: {
       userId: studentUser.id,
-      schoolId: school.id,
     },
   });
 

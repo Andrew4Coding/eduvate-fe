@@ -10,21 +10,21 @@ export default async function coursesLoader(args: LoaderFunctionArgs) {
     if (user?.role === 'teacher') {
         courses = await prisma.course.findMany({
             where: {
-                // teachers: {
-                //     some: {
-                //         id: user?.id,
-                //     },
-                // }
+                teachers: {
+                    some: {
+                        userId: user?.id,
+                    },
+                }
             },
         });
     } else {
         courses = await prisma.course.findMany({
             where: {
-                // students: {
-                //     some: {
-                //         id: user?.id,
-                //     },
-                // },
+                students: {
+                    some: {
+                        userId: user?.id,
+                    },
+                },
             },
         });
     }

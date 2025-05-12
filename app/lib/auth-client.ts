@@ -9,7 +9,7 @@ export const authClient = createAuthClient({
 });
 
 export interface userData {
-    role: 'student' | 'teacher' | 'admin';
+    role: 'student' | 'teacher';
     id: string;
     name: string;
     email: string;

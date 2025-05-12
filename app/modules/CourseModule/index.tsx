@@ -49,7 +49,6 @@ export default function CourseManagement() {
     const user: userData = useOutletContext();
     const courses: Course[] = useLoaderData();
 
-
     const [isEnrollDialogOpen, setIsEnrollDialogOpen] = useState(false)
     const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
     const [enrollmentStatus, setEnrollmentStatus] = useState<"idle" | "loading" | "success" | "error">("idle")
@@ -111,7 +110,7 @@ export default function CourseManagement() {
                     setCreationStatus("idle")
                     createForm.reset()
                 }, 1500)
-                navigate(`/courses/${result.id}`)
+                navigate(`/dashboard/courses/${result.id}`)
             } else {
                 setCreationStatus("error")
             }
@@ -121,41 +120,17 @@ export default function CourseManagement() {
     }
 
     return (
-        <div className="min-h-screen bg-white overflow-hidden">
-            <div className="absolute">
-                <div className="top-0 right-0 w-64 h-64 bg-purple-200 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl opacity-70"></div>
-                <div className="bottom-0 left-0 w-64 h-64 bg-purple-200 rounded-full translate-y-1/2 -translate-x-1/2 blur-3xl opacity-70"></div>
-            </div>
-
+        <div className="min-h-screen  overflow-hidden">
             <div className="container mx-auto px-4 py-8">
                 <div className="flex justify-between items-center mb-8">
-                    <h1 className="text-3xl font-bold text-gray-800">Courses</h1>
-                    <Button
-                        variant="outline"
-                        className="flex items-center"
-                        onClick={() => {
-                            if (user.role === "student") {
-                                setIsEnrollDialogOpen(true)
-                            } else {
-                                setIsCreateDialogOpen(true)
-                            }
-                        }}
-                    >
-                        {user.role === "student" ? (
-                            <div className="flex items-center">
-                                <PlusCircle className="mr-2 h-4 w-4" />
-                                Enroll in Course
-                            </div>
-                        ) : (
-                            <div className="flex items-center">
-                                <PlusCircle className="mr-2 h-4 w-4" />
-                                Create Course
-                            </div>
-                        )}
-                    </Button>
+                    <h1 className="text-3xl font-bold text-gray-800">
+                        Mata Pelajaran
+                    </h1>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+                    aria-description="content"
+                >
                     {courses.map((course) => {
                         const config = courseTypeConfig[course.category]
 
@@ -196,9 +171,11 @@ export default function CourseManagement() {
                                             {course.description && <p className="text-gray-600 text-sm line-clamp-2">{course.description}</p>}
 
                                             <Link
-                                                to={`/courses/${course.id}`}
+                                                to={`/dashboard/courses/${course.id}`}
                                             >
-                                                <Button className="w-full">View Details</Button>
+                                                <Button
+                                                    id="view-details"
+                                                    className="w-full">View Details</Button>
                                             </Link>
 
                                         </div>
@@ -208,29 +185,15 @@ export default function CourseManagement() {
                         )
                     })}
 
-                    {!courses.length && (
-                        <div
-                            aria-description="content"
-                            className="col-span-1 md:col-span-2 lg:col-span-3 flex flex-col items-center justify-center py-16 space-y-4">
-                            <Smile className="h-16 w-16 text-gray-400 mb-4" />
-                            <div className="text-center">
-                                <p className="text-gray-500">No courses available.</p>
-                                {user.role === "student" ? (
-                                    <p className="text-gray-500">Please contact your teacher for more information or enroll in a course.</p>
-                                ) : (
-                                    <p className="text-gray-500">Create your first course to get started.</p>
-                                )}
-                            </div>
-                        </div>
-                    )}
-
                     {user.role === "student" ? (
                         <Dialog open={isEnrollDialogOpen} onOpenChange={setIsEnrollDialogOpen}>
                             <DialogTrigger asChild>
-                                {
-
-                                }
-                                <Button>Enroll in Course</Button>
+                                <button
+                                    id="enroll-course"
+                                    className="flex flex-col items-center justify-center p-6 border border-dashed rounded-lg cursor-pointer hover:bg-gray-50">
+                                    <PlusCircle className="h-16 w-16 text-gray-400 mb-4" />
+                                    <p className="text-gray-500">Enroll in a Course</p>
+                                </button>
                             </DialogTrigger>
                             <DialogContent>
                                 <DialogHeader>
@@ -239,7 +202,9 @@ export default function CourseManagement() {
                                 </DialogHeader>
 
                                 <Form {...enrollForm}>
-                                    <form onSubmit={enrollForm.handleSubmit(onEnrollSubmit)} className="space-y-4">
+                                    <form
+                                        id="enroll-course-form"
+                                        onSubmit={enrollForm.handleSubmit(onEnrollSubmit)} className="space-y-4">
                                         <FormField
                                             control={enrollForm.control}
                                             name="courseCode"
@@ -247,7 +212,9 @@ export default function CourseManagement() {
                                                 <FormItem>
                                                     <FormLabel>Course Code</FormLabel>
                                                     <FormControl>
-                                                        <Input placeholder="Enter course code" {...field} />
+                                                        <Input
+                                                            id="field-courseCode"
+                                                            placeholder="Enter course code" {...field} />
                                                     </FormControl>
                                                     <FormMessage />
                                                 </FormItem>
@@ -255,7 +222,9 @@ export default function CourseManagement() {
                                         />
 
                                         <DialogFooter>
-                                            <Button type="submit" disabled={enrollmentStatus === "loading"}>
+                                            <Button
+                                                id="enroll-course-submit"
+                                                type="submit" disabled={enrollmentStatus === "loading"}>
                                                 {enrollmentStatus === "loading"
                                                     ? "Enrolling..."
                                                     : enrollmentStatus === "success"
@@ -268,7 +237,15 @@ export default function CourseManagement() {
                             </DialogContent>
                         </Dialog>
                     ) : (
-                        <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+                            <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}                            >
+                            <DialogTrigger asChild>
+                                <button
+                                    id="create-course"
+                                    className="flex flex-col items-center justify-center p-6 border border-dashed rounded-lg cursor-pointer hover:bg-gray-50">
+                                    <PlusCircle className="h-16 w-16 text-gray-400 mb-4" />
+                                    <p className="text-gray-500">Create a Course</p>
+                                </button>
+                            </DialogTrigger>
                             <DialogContent className="sm:max-w-[525px]">
                                 <DialogHeader>
                                     <DialogTitle>Create a New Course</DialogTitle>
@@ -276,7 +253,8 @@ export default function CourseManagement() {
                                 </DialogHeader>
 
                                 <Form {...createForm}>
-                                    <form onSubmit={createForm.handleSubmit(onCreateSubmit)} className="space-y-4">
+                                    <form
+                                            onSubmit={createForm.handleSubmit(onCreateSubmit)} className="space-y-4">
                                         <FormField
                                             control={createForm.control}
                                             name="name"
@@ -381,6 +359,22 @@ export default function CourseManagement() {
                                 </Form>
                             </DialogContent>
                         </Dialog>
+                    )}
+
+                    {!courses.length && (
+                        <div
+                            aria-description="content"
+                            className="col-span-1 md:col-span-2 lg:col-span-3 flex flex-col items-center justify-center py-16 space-y-4">
+                            <Smile className="h-16 w-16 text-gray-400 mb-4" />
+                            <div className="text-center">
+                                <p className="text-gray-500">No courses available.</p>
+                                {user.role === "student" ? (
+                                    <p className="text-gray-500">Please contact your teacher for more information or enroll in a course.</p>
+                                ) : (
+                                    <p className="text-gray-500">Create your first course to get started.</p>
+                                )}
+                            </div>
+                        </div>
                     )}
                 </div>
             </div>

@@ -1,15 +1,20 @@
 import {
+  data,
   isRouteErrorResponse,
   Links,
   Meta,
   Outlet,
   Scripts,
   ScrollRestoration,
+  type LoaderFunctionArgs,
 } from "react-router";
 
+import jwt from 'jsonwebtoken';
+import { Toaster } from "sonner";
 import type { Route } from "./+types/root";
 import "./app.css";
-import { Toaster } from "sonner";
+import { getUser } from "./lib/auth-client";
+import { commitSession, getSession } from "./lib/server/flash";
 
 export const links: Route.LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -46,6 +51,31 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Scripts />
       </body>
     </html>
+  );
+}
+
+export async function loader(args: LoaderFunctionArgs) {
+  const user = await getUser(args.request);
+
+  const ticket = jwt.sign(user ?? {}, process.env.JWT_SECRET as string)
+
+  const session = await getSession(args.request.headers.get('Cookie'));
+
+  if (session.get('ticket')) {
+    console.log(session.get('ticket'));
+    
+    return null;
+  }
+
+  session.set('ticket', ticket);
+
+  return data(
+    {},
+    {
+      headers: {
+        'Set-Cookie': await commitSession(session),
+      },
+    }
   );
 }
 

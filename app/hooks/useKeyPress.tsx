@@ -44,12 +44,56 @@ export const KeyPressProvider = ({ children }: { children: React.ReactNode }) =>
             }
         };
 
+        const handleMouseDown = () => {
+            setSpacePressed(true);
+
+            holdTimeout.current = setTimeout(() => {
+                setIsHeld(true);
+            }, 500);
+        };
+
+        const handleMouseUp = () => {
+            setSpacePressed(false);
+            setIsHeld(false);
+
+            if (holdTimeout.current) {
+                clearTimeout(holdTimeout.current);
+                holdTimeout.current = null;
+            }
+        };
+
+        const handleTouchStart = () => {
+            setSpacePressed(true);
+
+            holdTimeout.current = setTimeout(() => {
+                setIsHeld(true);
+            }, 500);
+        };
+
+        const handleTouchEnd = () => {
+            setSpacePressed(false);
+            setIsHeld(false);
+
+            if (holdTimeout.current) {
+                clearTimeout(holdTimeout.current);
+                holdTimeout.current = null;
+            }
+        };
+
         window.addEventListener("keydown", handleKeyDown);
         window.addEventListener("keyup", handleKeyUp);
+        window.addEventListener("mousedown", handleMouseDown);
+        window.addEventListener("mouseup", handleMouseUp);
+        window.addEventListener("touchstart", handleTouchStart);
+        window.addEventListener("touchend", handleTouchEnd);
 
         return () => {
             window.removeEventListener("keydown", handleKeyDown);
             window.removeEventListener("keyup", handleKeyUp);
+            window.removeEventListener("mousedown", handleMouseDown);
+            window.removeEventListener("mouseup", handleMouseUp);
+            window.removeEventListener("touchstart", handleTouchStart);
+            window.removeEventListener("touchend", handleTouchEnd);
             if (holdTimeout.current) {
                 clearTimeout(holdTimeout.current);
             }

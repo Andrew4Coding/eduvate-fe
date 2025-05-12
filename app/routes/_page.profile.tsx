@@ -34,29 +34,14 @@ export async function loader(args: LoaderFunctionArgs) {
             where: {
                 id: user.id,
             },
-            include: {
-                school: true,
-            },
         });
-    } else if (user.role === 'teacher') {
+    } else {
         userData = await prisma.teacher.findFirst({
             where: {
                 id: user.id,
             },
-            include: {
-                school: true,
-            },
         });
-    } else if (user.role === 'admin') {
-        userData = await prisma.admin.findFirst({
-            where: {
-                id: user.id,
-            },
-            include: {
-                school: true,
-            },
-        });
-    }
+    } 
 
     return {
         ...user,

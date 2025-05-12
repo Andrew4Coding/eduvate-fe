@@ -6,7 +6,7 @@ import { useEffect, useState } from "react"
 import { Button } from "~/components/ui/button"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "~/components/ui/dialog"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "~/components/ui/select"
-import { useKeyPress } from "~/hooks/useSpacePress"
+import { useKeyPress } from "~/hooks/useKeyPress"
 import useSpeakText from "~/hooks/useSpeakSpeech"
 import useVoiceRecorder from "~/hooks/useVoiceRecord"
 import { executeCommand } from "~/lib/command"
@@ -82,17 +82,25 @@ export default function VoiceIndicator() {
 
                 console.log(cleanedText);
 
-                // Get the first line of the response
-                const firstLine = cleanedText.split("\n")[0]
+                if (cleanedText.includes("EXECCOMMAND")) {
+                    // Speak the sentence before EXECCOMMAND
+                    const beforeCommandText = cleanedText.substring(0, cleanedText.indexOf("EXECCOMMAND")).trim()
+                    if (beforeCommandText) {
+                        speech.stopSpeaking()
+                        speech.speak(beforeCommandText)
+                    }
 
-                if (firstLine.startsWith("EXECCOMMAND")) {
-                    const command = cleanedText.replace("EXECCOMMAND", "").trim().split("\n")[0]
-
-                    return executeCommand(cleanedText.replace("EXECCOMMAND", "").trim(), speech)
+                    // Get text starting from EXECCOMMAND but still includes EXECCOMMAND
+                    const commandText = cleanedText.substring(
+                        cleanedText.indexOf("EXECCOMMAND") + "EXECCOMMAND".length
+                    )
+                    return executeCommand(commandText.trim().replaceAll("EXECCOMMAND", ""), speech)
+                } else {
+                    // Speak the cleaned text
+                    speech.stopSpeaking()
+                    speech.speak(cleanedText)
                 }
 
-                // Speak the cleaned text
-                speech.speak(cleanedText)
             }
         } catch (error) {
             console.error("Error processing audio:", error)
@@ -156,10 +164,10 @@ export default function VoiceIndicator() {
                                 <SelectTrigger className="w-full">
                                     <SelectValue placeholder="Select a microphone" />
                                 </SelectTrigger>
-                                <SelectContent>
+                                <SelectContent className="w-">
                                     {audioDevices.map((device) => (
-                                        <SelectItem key={device.deviceId} value={device.deviceId}>
-                                            {device.label.slice(0, 30)}
+                                        <SelectItem key={device.deviceId} value={device.deviceId} className="overflow-hidden">
+                                            {device.label.slice(0, 40)} ...
                                         </SelectItem>
                                     ))}
                                 </SelectContent>
@@ -203,27 +211,29 @@ export default function VoiceIndicator() {
             </AnimatePresence>
 
             {/* Voice Button */}
-            <div className="fixed bottom-10 right-10 flex flex-col items-end space-y-4">
+            <div className="fixed bottom-32 md:bottom-10 right-4 md:right-10 flex flex-col items-end space-y-4">
                 {/* Settings Button */}
                 <motion.button
-                    className="p-3 rounded-full bg-gray-800/70 text-white hover:bg-gray-700/70 transition-colors"
+                    className="p-3 rounded-full bg-gray-800/70 text-white hover:bg-gray-700/70 transition-colors cursor-pointer"
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     onClick={openMicSettings}
                 >
-                    <Settings size={20} />
+                    <Settings
+                        className="size-8 md:size-4"
+                    />
                 </motion.button>
 
                 {/* Main Voice Button */}
                 <motion.div
-                    className="w-20 aspect-square p-4 flex flex-col items-center justify-center rounded-full bg-[#C244EB] text-white relative"
+                    className="w-40 md:w-20 aspect-square p-4 flex flex-col items-center justify-center rounded-full bg-[#C244EB] text-white relative cursor-pointer hover:scale-105 duration-300"
                     animate={{
                         scale: isHeld ? 1.2 : 1, // Scale up when space is held
                         boxShadow: isHeld ? "0px 0px 20px rgba(194, 68, 235, 0.8)" : "0px 0px 10px rgba(194, 68, 235, 0.5)", // Add a glowing effect
                     }}
                     transition={{ type: "spring", stiffness: 300, damping: 20 }}
                 >
-                    <Mic />
+                    <Mic className="aspect-square size-16 md:size-8" />
                     {isHeld && (
                     <motion.div
                             className="flex space-x-1 mt-2"

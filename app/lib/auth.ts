@@ -30,22 +30,12 @@ export const auth = betterAuth({
                     id: true,
                 }
             });
-            const admin = await prisma.admin.findFirst({
-                where: {
-                    userId: user.id,
-                },
-                select: {
-                    id: true,
-                }
-            });
 
             let role = ''
             if (teacher) {
                 role = 'teacher'
-            } else if (student) {
+            } else  {
                 role = 'student'
-            } else if (admin) {
-                role = 'admin'
             }
 
             return {

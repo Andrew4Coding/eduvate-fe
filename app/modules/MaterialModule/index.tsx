@@ -8,7 +8,7 @@ import { useLoaderData } from "react-router"
 import useSpeakText from "~/hooks/useSpeakSpeech"
 import { Badge } from "~/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs"
-import { useKeyPress } from "~/hooks/useSpacePress"
+import { useKeyPress } from "~/hooks/useKeyPress"
 
 interface TranscriptSegment {
     id: string

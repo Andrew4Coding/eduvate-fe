@@ -1,6 +1,5 @@
-import QuizProgressModule from "~/modules/QuizProgressModule";
 import QuizStartModule from "~/modules/QuizStartModule";
-import { quizStartLoader} from "~/modules/QuizStartModule/loader";
+import { quizStartLoader } from "~/modules/QuizStartModule/loader";
 
 export { quizStartLoader as loader };
 

@@ -5,10 +5,7 @@ type fetchResponse = {
 }
 
 export const fetchClient = async (path: string, options: RequestInit = {}): Promise<fetchResponse> => {
-    const baseUrl = 'http://localhost:8000';
-    const fetchUrl = baseUrl ? new URL(path, baseUrl).toString() : path;
-
-    const response = await fetch(fetchUrl, {
+    const response = await fetch(path, {
         ...options,
         headers: {
             ...options.headers,

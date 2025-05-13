@@ -1,6 +1,6 @@
 import { ArrowLeft, Eye, EyeOff } from "lucide-react"
 import { useState } from "react"
-import { Link, useNavigate } from "react-router"
+import { data, Link, useLoaderData, useNavigate, useRouteLoaderData, type LoaderFunctionArgs } from "react-router"
 import { toast } from "sonner"
 import { Button } from "~/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "~/components/ui/card"
@@ -8,17 +8,25 @@ import { Input } from "~/components/ui/input"
 import { Label } from "~/components/ui/label"
 import { authClient } from "~/lib/auth-client"
 
+
+export async function loader({ request }: LoaderFunctionArgs) {
+    const backendUrl = process.env.BACKEND_URL;
+
+    return data({
+        backendUrl,
+    })
+}
+
 export default function TeacherRegisterPage() {
     const navigate = useNavigate()
     const [isLoading, setIsLoading] = useState(false)
     const [showPassword, setShowPassword] = useState(false)
+    const { backendUrl } = useLoaderData<typeof loader>()
     const [formData, setFormData] = useState({
         name: "",
         email: "",
         password: "",
     })
-
-    const { backendUrl } = useRouteLoaderData("root");
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target

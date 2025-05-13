@@ -36,10 +36,7 @@ export default function QuizContainer({ quiz }: { quiz: Quiz }) {
 
   const handleSubmitQuiz = async () => {
     await fetchClient("/api/quiz/submit", {
-<<<<<<< HEAD
       method: "POST",
-=======
->>>>>>> 2c221e626064bd3a6d11a991219addd9f647d9b6
       body: JSON.stringify({
         quizId: quiz.id,
         questionSeq: quiz.QuizQuestion.map((question) => question.id),

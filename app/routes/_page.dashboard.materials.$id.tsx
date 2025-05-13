@@ -17,7 +17,7 @@ export async function loader(args: LoaderFunctionArgs) {
 
 
     if (!materials) {
-        return redirect("/courses");
+        return redirect("/dashboard/courses");
     }
 
     return materials;

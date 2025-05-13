@@ -47,7 +47,7 @@ export default function TeacherRegisterPage() {
                 password: formData.password,
             }, {
                 onSuccess: async () => {
-                    const response = await fetch(`${backendUrl + '/user/register-teacher'}`, {
+                    const response = await fetch(`${backendUrl + '/api/user/register-teacher'}`, {
                         method: "POST",
                         headers: {
                             "Content-Type": "application/json",

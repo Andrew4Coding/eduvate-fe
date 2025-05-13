@@ -190,7 +190,7 @@ export default function CourseManagement() {
                             <DialogTrigger asChild>
                                 <button
                                     id="enroll-course"
-                                    className="flex flex-col items-center justify-center p-6 border border-dashed rounded-lg cursor-pointer hover:bg-gray-50">
+                                    className="flex flex-col items-center justify-center p-6 border border-dashed rounded-lg cursor-pointer hover:bg-gray-50/50 duration-300">
                                     <PlusCircle className="h-16 w-16 text-gray-400 mb-4" />
                                     <p className="text-gray-500">Enroll in a Course</p>
                                 </button>
@@ -241,7 +241,7 @@ export default function CourseManagement() {
                             <DialogTrigger asChild>
                                 <button
                                     id="create-course"
-                                    className="flex flex-col items-center justify-center p-6 border border-dashed rounded-lg cursor-pointer hover:bg-gray-50">
+                                    className="flex flex-col items-center justify-center p-6 border border-dashed rounded-lg cursor-pointer hover:bg-gray-50/50 duration-300">
                                     <PlusCircle className="h-16 w-16 text-gray-400 mb-4" />
                                     <p className="text-gray-500">Create a Course</p>
                                 </button>
@@ -366,13 +366,13 @@ export default function CourseManagement() {
                             aria-description="content"
                             className="col-span-1 md:col-span-2 lg:col-span-3 flex flex-col items-center justify-center py-16 space-y-4">
                             <Smile className="h-16 w-16 text-gray-400 mb-4" />
-                            <div className="text-center">
-                                <p className="text-gray-500">No courses available.</p>
-                                {user.role === "student" ? (
-                                    <p className="text-gray-500">Please contact your teacher for more information or enroll in a course.</p>
-                                ) : (
-                                    <p className="text-gray-500">Create your first course to get started.</p>
-                                )}
+                            <div className="text-center space-y-2">
+                                <p className="font-bold text-2xl">No courses available.</p>
+                                <p className="text-gray-500">
+                                    {user.role === "student"
+                                        ? "Please contact your teacher for more information or enroll in a course."
+                                        : "Create your first course to get started."}
+                                </p>
                             </div>
                         </div>
                     )}

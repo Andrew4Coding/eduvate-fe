@@ -1,16 +1,17 @@
+import jwt from 'jsonwebtoken';
 import type { ActionFunction, LoaderFunction } from 'react-router';
-import { getSession } from '~/lib/server/flash';
-
+import { getUser } from '~/lib/auth-client';
 // Handle GET requests
 export const loader: LoaderFunction = async ({ request }) => {
+    const user = await getUser(request);
+    
+    const ticket = jwt.sign(user ?? {}, process.env.JWT_SECRET as string)
+    
     const cookieHeader = request.headers.get('Cookie') || '';
 
     const url = new URL(request.url);
 
     const path = `${url.pathname}${url.search}`; // Preserve search params
-
-    const session = await getSession(cookieHeader);
-    const ticket = session.get('ticket');
 
     const realApiResponse = await fetch(`${process.env.BACKEND_URL}${path}`, {
         headers: {
@@ -51,6 +52,10 @@ export const loader: LoaderFunction = async ({ request }) => {
 
 // Handle POST, PUT, DELETE, etc.
 export const action: ActionFunction = async ({ request }) => {
+    const user = await getUser(request);
+
+    const ticket = jwt.sign(user ?? {}, process.env.JWT_SECRET as string)
+
     const url = new URL(request.url);
     const body = await request.json();
 
@@ -58,12 +63,7 @@ export const action: ActionFunction = async ({ request }) => {
 
     const path = url.pathname;
 
-    const session = await getSession(cookieHeader);
-    const ticket = session.get('ticket');
-
-    const backendUrl = process.env.BACKEND_URL;
-
-    const realApiResponse = await fetch(`${backendUrl}${path}`, {
+    const realApiResponse = await fetch(`${process.env.BACKEND_URL}${path}`, {
         method: request.method,
         headers: {
             'Content-Type': 'application/json',

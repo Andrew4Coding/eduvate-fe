@@ -20,7 +20,7 @@ path: string;
 {
     name: "Course",
     icon: <Laptop2 size={24}/>,
-    path: "/courses",
+    path: "/dashboard/courses",
 },
 ];
 

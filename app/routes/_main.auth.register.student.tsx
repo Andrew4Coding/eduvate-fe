@@ -46,7 +46,7 @@ export default function StudentRegisterPage() {
                 password: formData.password,
             }, {
                 onSuccess: async (ctx) => {
-                    const response = await fetch(`${backendUrl + '/user/register-student'}`, {
+                    const response = await fetch(`${backendUrl + '/api/user/register-student'}`, {
                         method: "POST",
                         headers: {
                             "Content-Type": "application/json",

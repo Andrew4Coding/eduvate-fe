@@ -18,6 +18,8 @@ export default function TeacherRegisterPage() {
         password: "",
     })
 
+    const { backendUrl } = useRouteLoaderData("root");
+
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target
         setFormData((prev) => ({
@@ -37,7 +39,7 @@ export default function TeacherRegisterPage() {
                 password: formData.password,
             }, {
                 onSuccess: async () => {
-                    const response = await fetch(`${'http://localhost:8000/user/register-teacher'}`, {
+                    const response = await fetch(`${backendUrl + '/user/register-teacher'}`, {
                         method: "POST",
                         headers: {
                             "Content-Type": "application/json",

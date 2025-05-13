@@ -1,5 +1,5 @@
-import type { Prisma } from "@prisma/client";
-import pdfToText from 'react-pdftotext';
+import { Prisma } from "@prisma/client";
+// import pdfToText from 'react-pdftotext';
 import { z } from "zod";
 import { fetchClient } from "~/lib/fetch";
 import uploadFileClient from "~/lib/file";
@@ -50,7 +50,8 @@ const addCourseItem = async (sectionId: string, data: z.infer<typeof addCourseIt
 
         let extractedText = ""
 
-        const text = await pdfToText(data.file as File)
+        // const text = await pdfToText(data.file as File)
+        const text = "test"
 
         const responseData = await fetchClient("/api/material/create", {
             method: "POST",

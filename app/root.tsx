@@ -71,9 +71,6 @@ export async function loader(args: LoaderFunctionArgs) {
 
   return data(
     {
-      backendUrl: process.env.BACKEND_URL,
-    },
-    {
       headers: {
         'Set-Cookie': await commitSession(session),
       },

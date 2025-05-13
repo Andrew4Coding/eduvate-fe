@@ -13,3 +13,6 @@ masuk-db:
 
 hapus-db:
 	docker rm -f eduvate-db && docker rmi -f eduvate-db
+
+commit-malas:
+	git add . && git commit -m "feat: apa ajalah" && git push

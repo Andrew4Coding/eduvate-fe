@@ -35,8 +35,11 @@ export default function QuizContainer({ quiz }: { quiz: Quiz }) {
   };
 
   const handleSubmitQuiz = async () => {
-    await fetchClient("/api/quiz/submit", {
+    await fetch("/api/quiz/submit", {
       method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
       body: JSON.stringify({
         quizId: quiz.id,
         questionSeq: quiz.QuizQuestion.map((question) => question.id),
@@ -50,18 +53,28 @@ export default function QuizContainer({ quiz }: { quiz: Quiz }) {
   };
 
   useEffect(() => {
-    const userAnswers = quiz.QuizSubmission[0] ? quiz.QuizSubmission[0].QuizSubmissionAnswer : [];
+    if (!quiz || !quiz.QuizQuestion || !Array.isArray(quiz.QuizQuestion)) {
+      setUserAnswers([]);
+      return;
+    }
+
+    const submission = quiz.QuizSubmission && quiz.QuizSubmission[0];
+    const userAnswersFromDb = submission && submission.QuizSubmissionAnswer ? submission.QuizSubmissionAnswer : [];
 
     const orderedUserAnswers = Array(quiz.QuizQuestion.length).fill(null);
-    const questionIds = quiz.QuizQuestion.map((question) => question.id);
+    const questionIdsInOrder = quiz.QuizQuestion.map((question) => question.id);
 
-    userAnswers.forEach((ans) => {
-      let idx = questionIds.indexOf(ans.answer);
-      orderedUserAnswers[idx] = ans.answer;
+    userAnswersFromDb.forEach((dbAnswer) => {
+      if (dbAnswer && dbAnswer.quizQuestionId && dbAnswer.answer) {
+        const questionIndex = questionIdsInOrder.indexOf(dbAnswer.quizQuestionId);
+        if (questionIndex !== -1) {
+          orderedUserAnswers[questionIndex] = dbAnswer.answer;
+        }
+      }
     });
 
-    setUserAnswers([...orderedUserAnswers]);
-  }, []);
+    setUserAnswers(orderedUserAnswers);
+  }, [quiz]);
 
   return (
     <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-md p-6">

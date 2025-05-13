@@ -62,17 +62,21 @@ export const action: ActionFunction = async ({ request }) => {
     const cookieHeader = request.headers.get('Cookie') || '';
 
     const path = url.pathname;
+    
+    const headers = new Headers({
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+        Cookie: cookieHeader || '', // Include the cookie header in the request
+        Authorization: `Bearer ${ticket || ''}`,
+        referer: request.headers.get('referer') || '', // Include the referer header
+        ...Object.fromEntries(request.headers.entries()),
+    });
+
+    console.log(headers);
 
     const realApiResponse = await fetch(`${process.env.BACKEND_URL}${path}`, {
         method: request.method,
-        headers: {
-            'Content-Type': 'application/json',
-            Accept: 'application/json',
-            Cookie: cookieHeader || '', // Include the cookie header in the request
-            Authorization: `Bearer ${ticket || ''}`,
-            referer: request.headers.get('referer') || '', // Include the referer header
-            ...Object.fromEntries(request.headers.entries()),
-        },
+        headers: headers,
         credentials: 'include',
         body: request.method !== 'GET' ? JSON.stringify(body) : null,
     });

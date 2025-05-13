@@ -7,21 +7,12 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from "~/components/ui/input"
 import { Label } from "~/components/ui/label"
 import { authClient } from "~/lib/auth-client"
-
-
-export async function loader({ request }: LoaderFunctionArgs) {
-    const backendUrl = process.env.BACKEND_URL;
-
-    return data({
-        backendUrl,
-    })
-}
+import { fetchClient } from "~/lib/fetch"
 
 export default function TeacherRegisterPage() {
     const navigate = useNavigate()
     const [isLoading, setIsLoading] = useState(false)
     const [showPassword, setShowPassword] = useState(false)
-    const { backendUrl } = useLoaderData<typeof loader>()
     const [formData, setFormData] = useState({
         name: "",
         email: "",
@@ -47,7 +38,7 @@ export default function TeacherRegisterPage() {
                 password: formData.password,
             }, {
                 onSuccess: async () => {
-                    const response = await fetch(`${backendUrl + '/api/user/register-teacher'}`, {
+                    const response = await fetchClient('/api/user/register-teacher', {
                         method: "POST",
                         headers: {
                             "Content-Type": "application/json",
@@ -58,10 +49,8 @@ export default function TeacherRegisterPage() {
                         }),
                     })
 
-                    const data = await response.json()
-
-                    if (!response.ok) {
-                        toast.error(data.message)
+                    if (response.statusText !== "OK") {
+                        toast.error(response.data.message)
 
                         await authClient.deleteUser({
                             password: formData.password,

@@ -2,7 +2,7 @@
 
 import { ArrowLeft, Eye, EyeOff } from "lucide-react"
 import { useState } from "react"
-import { Link, useNavigate } from "react-router"
+import { Link, useNavigate, useRouteLoaderData } from "react-router"
 import { toast } from "sonner"
 import { Button } from "~/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "~/components/ui/card"
@@ -19,6 +19,8 @@ export default function StudentRegisterPage() {
         email: "",
         password: "",
     })
+
+    const { backendUrl } = useRouteLoaderData("root");
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target
@@ -39,7 +41,7 @@ export default function StudentRegisterPage() {
                 password: formData.password,
             }, {
                 onSuccess: async (ctx) => {
-                    const response = await fetch(`${'http://localhost:8000/user/register-student'}`, {
+                    const response = await fetch(`${backendUrl + '/user/register-student'}`, {
                         method: "POST",
                         headers: {
                             "Content-Type": "application/json",

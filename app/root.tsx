@@ -70,7 +70,9 @@ export async function loader(args: LoaderFunctionArgs) {
   session.set('ticket', ticket);
 
   return data(
-    {},
+    {
+      backendUrl: process.env.BACKEND_URL,
+    },
     {
       headers: {
         'Set-Cookie': await commitSession(session),

@@ -61,7 +61,9 @@ export const action: ActionFunction = async ({ request }) => {
     const session = await getSession(cookieHeader);
     const ticket = session.get('ticket');
 
-    const realApiResponse = await fetch(`${process.env.BACKEND_URL}${path}`, {
+    const backendUrl = process.env.BACKEND_URL;
+
+    const realApiResponse = await fetch(`${backendUrl}${path}`, {
         method: request.method,
         headers: {
             'Content-Type': 'application/json',
@@ -69,7 +71,7 @@ export const action: ActionFunction = async ({ request }) => {
             Cookie: cookieHeader || '', // Include the cookie header in the request
             Authorization: `Bearer ${ticket || ''}`,
             referer: request.headers.get('referer') || '', // Include the referer header
-            ...request.headers,
+            ...Object.fromEntries(request.headers.entries()),
         },
         credentials: 'include',
         body: request.method !== 'GET' ? JSON.stringify(body) : null,

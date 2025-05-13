@@ -8,17 +8,13 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "~/components/u
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "~/components/ui/select"
 import { useKeyPress } from "~/hooks/useKeyPress"
 import useVoiceRecorder from "~/hooks/useVoiceRecord"
-import AudioPlayer from "~/lib/speech/audio"
+import { audioManager } from "~/lib/speech/audio"
 import { executeCommand } from "~/lib/speech/command"
 import getPageContent from "~/lib/speech/page-content"
-import { TTS } from "~/lib/speech/tts"
 
 export default function VoiceIndicator() {
     const { isHeld } = useKeyPress()
     
-    const audioPlayer = new AudioPlayer();
-    const tts = new TTS();
-
     const [showMicDialog, setShowMicDialog] = useState(false)
     const [isLoading, setIsLoading] = useState(false)
     const [isFirstTime, setIsFirstTime] = useState(true)
@@ -62,9 +58,9 @@ export default function VoiceIndicator() {
 
             formData.append("pageContent", getPageContent())
 
-            await audioPlayer.playAudio("/audios/mikir.mp3")
+            await audioManager.playAudio("/audios/mikir.mp3")
             
-            audioPlayer.playAudio("/audios/tick.mp3")
+            audioManager.playAudio("/audios/tick.mp3")
             
             // Send to your API endpoint
             const response = await fetch("/api/transcribe", {
@@ -94,16 +90,16 @@ export default function VoiceIndicator() {
                     // Speak the sentence before EXECCOMMAND
                     const beforeCommandText = cleanedText.substring(0, cleanedText.indexOf("EXECCOMMAND")).trim()
                     if (beforeCommandText) {
-                        await tts.speak(beforeCommandText)
+                        await audioManager.speak(beforeCommandText)
                     }
 
                     // Get text starting from EXECCOMMAND but still includes EXECCOMMAND
                     const commandText = cleanedText.substring(
                         cleanedText.indexOf("EXECCOMMAND") + "EXECCOMMAND".length
                     )
-                    return executeCommand(commandText.trim().replaceAll("EXECCOMMAND", ""), tts)
+                    return executeCommand(commandText.trim().replaceAll("EXECCOMMAND", ""), audioManager)
                 } else {
-                    await tts.speak(cleanedText)
+                    await audioManager.speak(cleanedText)
                 }
             }
         } catch (error) {
@@ -120,12 +116,12 @@ export default function VoiceIndicator() {
 
     // Handle recording based on space key
     useEffect(() => {
-        tts.stopSpeak()
+        audioManager.stopSpeak()
         // Only allow recording if microphone setup is complete
         if (isHeld && initialSetupDone && isFirstTime) {
             sessionStorage.setItem("hasInteracted", "true")
-            const halo = new Audio("/audios/halo.mp3")
-            halo.play().catch()
+            audioManager.stopSpeak()
+            audioManager.playAudio("/audios/halo.mp3")
 
             startRecording()
 

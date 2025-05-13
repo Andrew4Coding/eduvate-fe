@@ -237,7 +237,7 @@ export default function CourseDetail() {
     const [isLoading, setIsLoading] = useState(false)
 
     return (
-        <div className="min-h-screen bg-white">
+        <div className="min-h-screen ">
             <div className="container mx-auto px-4 py-8 w-full">
                 <div className="flex max-md:flex-col justify-between md:items-center mb-8 gap-4">
                     <h1 className="text-3xl font-bold text-gray-800">Mata Pelajaran</h1>
@@ -433,22 +433,6 @@ export default function CourseDetail() {
                                                         </Button>
                                                     </DropdownMenuTrigger>
                                                     <DropdownMenuContent align="end">
-                                                        <DropdownMenuItem
-                                                            onClick={(e) => {
-                                                                e.stopPropagation()
-                                                                // Navigate to edit page based on item type
-                                                                if (item.type === "MATERIAL") {
-                                                                    navigate(`/materials/${item.id}/edit`)
-                                                                } else if (item.type === "QUIZ") {
-                                                                    navigate(`/quizzes/${item.id}/edit`)
-                                                                } else if (item.type === "TASK") {
-                                                                    navigate(`/tasks/${item.id}/edit`)
-                                                                }
-                                                            }}
-                                                        >
-                                                            Edit Item
-                                                        </DropdownMenuItem>
-                                                        <DropdownMenuSeparator />
                                                         <DropdownMenuItem
                                                             className="text-red-600"
                                                             onClick={(e) => {

@@ -241,7 +241,7 @@ export default function CourseManagement() {
                             <DialogTrigger asChild>
                                 <button
                                     id="create-course"
-                                    className="flex flex-col items-center justify-center p-6 border border-dashed rounded-lg cursor-pointer hover:bg-gray-50">
+                                    className="flex flex-col items-center justify-center p-6 border border-dashed rounded-lg cursor-pointer hover:bg-gray-50/50 duration-300">
                                     <PlusCircle className="h-16 w-16 text-gray-400 mb-4" />
                                     <p className="text-gray-500">Create a Course</p>
                                 </button>

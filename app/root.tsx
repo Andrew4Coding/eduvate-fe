@@ -69,9 +69,7 @@ export async function loader(args: LoaderFunctionArgs) {
     });
   }
 
-  if (user) {
-    session.set('ticket', ticket);
-  }
+  session.set('ticket', ticket);
 
   return data(
     {

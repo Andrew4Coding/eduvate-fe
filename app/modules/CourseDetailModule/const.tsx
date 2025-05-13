@@ -129,7 +129,9 @@ const deleteCourse = async (courseId: string) => {
     if (!responseData) {
         throw new Error("Failed to delete course")
     }
-    return { success: true }
+    return { 
+        success: true,
+     }
 }
 
 const deleteSection = async (sectionId: string) => {

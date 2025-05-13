@@ -4,7 +4,6 @@ import NavigationButtons from "./navigation-button";
 import QuestionGrid from "./question-grid";
 import Timer from "./timer";
 import { type Quiz } from "../index";
-import { fetchClient } from "~/lib/fetch";
 
 export default function QuizContainer({ quiz }: { quiz: Quiz }) {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
@@ -35,7 +34,7 @@ export default function QuizContainer({ quiz }: { quiz: Quiz }) {
   };
 
   const handleSubmitQuiz = async () => {
-    await fetchClient("/api/quiz/submit", {
+    await fetch("/api/quiz/submit", {
       body: JSON.stringify({
         quizId: quiz.id,
         questionSeq: quiz.QuizQuestion.map((question) => question.id),

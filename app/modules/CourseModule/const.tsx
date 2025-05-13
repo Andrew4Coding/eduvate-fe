@@ -1,7 +1,6 @@
 import type { COURSE_CATEGORY } from "@prisma/client";
 import { Atom, BarChart3, BookText, DollarSign, Dumbbell, Globe, Languages, Music, Palette, Plus, Smile } from "lucide-react";
 import { z } from "zod";
-import { fetchClient } from "~/lib/fetch";
 
 export const courseTypeConfig: Record<COURSE_CATEGORY, { color: string; bgColor: string; icon: React.ReactNode; label: string }> = {
     SOCIOLOGY: {
@@ -101,13 +100,14 @@ const createCourseSchema = z.object({
 // Mock function to enroll in a course
 const enrollInCourse = async (courseCode: string) => {
     console.log(`Enrolling in course with code: ${courseCode}`)
-    const responseData = await fetchClient("/api/course/enroll", {
+    const responseData = await fetch("/api/course/enroll", {
         method: "POST",
         body: JSON.stringify({ courseCode })
     })
 
     return { 
-        success: responseData.data.error !== true
+        success: responseData.data.error !== true,
+        message: responseData.data.message
      }
 }
 
@@ -115,7 +115,7 @@ const enrollInCourse = async (courseCode: string) => {
 const createCourse = async (courseData: z.infer<typeof createCourseSchema>) => {
     console.log("Creating course:", courseData)
 
-    const responseData = await fetchClient("/api/course", {
+    const responseData = await fetch("/api/course", {
         method: "POST",
         body: JSON.stringify(courseData)
     })

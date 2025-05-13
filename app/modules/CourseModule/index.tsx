@@ -29,6 +29,7 @@ import { Textarea } from "~/components/ui/textarea"
 import type { userData } from "~/lib/auth-client"
 import { cn } from "~/lib/utils"
 import { courseTypeConfig, createCourse, createCourseSchema, enrollCourseSchema, enrollInCourse } from "./const"
+import { toast } from "sonner"
 
 // Define the interface for course data
 interface Course {
@@ -86,9 +87,12 @@ export default function CourseManagement() {
                     setIsEnrollDialogOpen(false)
                     setEnrollmentStatus("idle")
                     enrollForm.reset()
+
+                    window.location.reload()
                 }, 1500)
             } else {
                 setEnrollmentStatus("error")
+                toast.error(result.message)
             }
         } catch (error) {
             setEnrollmentStatus("error")

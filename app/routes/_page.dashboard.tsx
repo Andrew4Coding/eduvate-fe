@@ -26,7 +26,7 @@ export default function Index() {
             <KeyPressProvider>
                 <Sidebar />
                 <Navbar />
-                <div className="h-full w-full relative pl-40">
+                <div className="h-full w-full relative md:pl-40">
                     <Outlet
                         context={user}
                     />

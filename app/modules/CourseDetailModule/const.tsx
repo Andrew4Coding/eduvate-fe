@@ -1,5 +1,5 @@
 import { Prisma } from "@prisma/client";
-// import pdfToText from 'react-pdftotext';
+import pdfToText from 'react-pdftotext';
 import { z } from "zod";
 import uploadFileClient from "~/lib/file";
 const addSectionSchema = z.object({
@@ -27,7 +27,7 @@ const editCourseSchema = z.object({
 
 // Mock functions for API calls
 const addSection = async (courseId: string, data: z.infer<typeof addSectionSchema>) => {
-    const responseData = await fetch("/api/course/section", {
+    const response = await fetch("/api/course/section", {
         method: "POST",
         body: JSON.stringify({
             courseId,
@@ -35,11 +35,13 @@ const addSection = async (courseId: string, data: z.infer<typeof addSectionSchem
         }),
     })
 
-    if (!responseData) {
+    if (!response) {
         throw new Error("Failed to create section")
     }
 
-    return { success: true, id: "new-section-id" }
+    const responseData = await response.json()
+
+    return { success: responseData.success, id: responseData.data.id }
 }
 
 const addCourseItem = async (sectionId: string, data: z.infer<typeof addCourseItemSchema>) => {
@@ -47,29 +49,28 @@ const addCourseItem = async (sectionId: string, data: z.infer<typeof addCourseIt
         // Upload file into /api/upload
         const url = await uploadFileClient(data.file as File, data.file!.name, data.fileType as string)
 
-        let extractedText = ""
+        const text = await pdfToText(data.file as File)
 
-        // const text = await pdfToText(data.file as File)
-        const text = "test"
-
-        const responseData = await fetch("/api/material/create", {
+        const response = await fetch("/api/material/create", {
             method: "POST",
             body: JSON.stringify({
                 courseSectionId: sectionId,
                 ...data,
                 transcripted: text,
                 fileUrl: url.url,
-                extractedText,
             }),
         })
 
-        if (!responseData) {
+        if (!response) {
             throw new Error("Failed to upload file")
         }
 
-        return { success: true, id: "new-item-id" }
+        const responseData = await response.json()
+
+        return { success: responseData.success }
+
     } else if (data.type === "QUIZ") {
-        const responseData = fetch("/api/quiz/create", {
+        const response = await fetch("/api/quiz/create", {
             method: "POST",
             body: JSON.stringify({
                 courseSectionId: sectionId,
@@ -77,83 +78,90 @@ const addCourseItem = async (sectionId: string, data: z.infer<typeof addCourseIt
             }),
         })
 
-        if (!responseData) {
+        if (!response) {
             throw new Error("Failed to upload file")
         }
 
-        return { success: true, id: "new-item-id" }
+        const responseData = await response.json()
+
+        return { success: responseData.success, id: responseData.data.id }
     } else if (data.type === "TASK") {
-        const responseData = fetch("/api/task/create", {
+        const response = await fetch("/api/task/create", {
             method: "POST",
             body: JSON.stringify({
                 courseSectionId: sectionId,
                 ...data,
             }),
         })
-        if (!responseData) {
+        if (!response) {
             throw new Error("Failed to upload file")
         }
 
-        return { success: true, id: "new-item-id" }
+        const responseData = await response.json()
+
+        return { success: responseData.success, id: responseData.data.id }
     }
 
     return { success: true, id: "new-item-id" }
 }
 
 const updateCourse = async (courseId: string, data: z.infer<typeof editCourseSchema>) => {
-    const responseData = await fetch(`/api/course/${courseId}`, {
+    const response = await fetch(`/api/course/${courseId}`, {
         method: "PUT",
         body: JSON.stringify(data),
     })
-    if (!responseData) {
+    if (!response) {
         throw new Error("Failed to update course")
     }
-    return { success: true }
+    const responseData = await response.json()
+    return { success: responseData.success }
 }
 
 const updateSection = async (sectionId: string, data: z.infer<typeof addSectionSchema>) => {
-    const responseData = await fetch(`/api/course/section/${sectionId}`, {
+    const response = await fetch(`/api/course/section/${sectionId}`, {
         method: "PUT",
         body: JSON.stringify(data),
     })
-    if (!responseData) {
+    if (!response) {
         throw new Error("Failed to update section")
     }
-    return { success: true }
+    const responseData = await response.json()
+    return { success: responseData.success }
 }
 
 const deleteCourse = async (courseId: string) => {
-    const responseData = await fetch(`/api/course/${courseId}`, {
+    const response = await fetch(`/api/course/${courseId}`, {
         method: "DELETE",
     })
-    if (!responseData) {
+    if (!response) {
         throw new Error("Failed to delete course")
     }
-    return { 
-        success: true,
-     }
+    const responseData = await response.json()
+    return { success: responseData.success }
 }
 
 const deleteSection = async (sectionId: string) => {
-    const responseData = await fetch(`/api/course/section/${sectionId}`, {
+    const response = await fetch(`/api/course/section/${sectionId}`, {
         method: "DELETE",
     })
-    if (!responseData) {
+    if (!response) {
         throw new Error("Failed to delete section")
     }
-    return { success: true }
+    const responseData = await response.json()
+    return { success: responseData.success }
 }
 
 const deleteCourseItem = async (itemId: string) => {
-    const responseData = await fetch(`/api/course/item/${itemId}`, {
+    const response = await fetch(`/api/course/item/${itemId}`, {
         method: "DELETE",
     })
 
-    if (!responseData) {
+    if (!response) {
         throw new Error("Failed to delete item")
     }
 
-    return { success: true }
+    const responseData = await response.json()
+    return { success: responseData.success }
 }
 
 interface Course

@@ -57,7 +57,12 @@ export const action: ActionFunction = async ({ request }) => {
     const ticket = jwt.sign(user ?? {}, process.env.JWT_SECRET as string)
 
     const url = new URL(request.url);
-    const body = await request.json();
+    let body = undefined;
+    if (request.method !== 'GET') {
+        try {
+            body = await request.json();
+        } catch { }
+    }
 
     const cookieHeader = request.headers.get('Cookie') || '';
 

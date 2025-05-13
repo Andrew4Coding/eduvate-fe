@@ -17,7 +17,7 @@ export default function LandingModule() {
               <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">
                 Ready to Transform Education?
               </h2>
-              <p className="max-w-[600px] opacity-90 md:text-xl">
+              <p className="max-w-[600px] opacity-90 md:text-lg/relaxed">
                 Join thousands of students and teachers who are already using EduVate to make education more
                 accessible and engaging.
               </p>

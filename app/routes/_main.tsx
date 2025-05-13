@@ -1,4 +1,4 @@
-import { Grid } from "lucide-react";
+import { LayoutGrid } from "lucide-react";
 import { Link, Outlet, useLoaderData, type LoaderFunctionArgs } from "react-router";
 import Footer from "~/components/elements/Footer";
 import { Button } from "~/components/ui/button";
@@ -35,7 +35,7 @@ export default function MainModuleLayout() {
                                 to={'dashboard'}
                             >
                                 <Button className="hidden md:flex">
-                                    <Grid />
+                                    <LayoutGrid />
                                     Dashboard
                                 </Button>
                             </Link>

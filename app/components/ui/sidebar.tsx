@@ -1,13 +1,14 @@
-import { Laptop2, LayoutGrid } from "lucide-react";
+import { Laptop2, LayoutGrid, LogOut } from "lucide-react";
 import { SimpleTooltip } from "./tooltip";
 import { motion } from "framer-motion";
-import { Link } from "react-router";
+import { Link, useLocation, useNavigate } from "react-router";
 
 import {
     Avatar,
     AvatarFallback,
     AvatarImage,
 } from "~/components/ui/avatar";
+import { authClient } from "~/lib/auth-client";
 
 
 const features: {
@@ -18,7 +19,7 @@ const features: {
         {
             name: "Home",
             icon: <LayoutGrid />,
-            path: "/"
+            path: "/dashboard"
         },
         {
             name: "Course",
@@ -27,6 +28,9 @@ const features: {
         }
     ]
 export default function Sidebar() {
+    const path = useLocation().pathname;
+    const navigate = useNavigate();
+
     return (
         <motion.div
             initial={{ x: -200 }}
@@ -34,10 +38,12 @@ export default function Sidebar() {
             exit={{ x: -200 }}
             transition={{ duration: 0.5 }}
             className="p-8 rounded-r-4xl bg-gray-100 left-0 h-[90%] shadow-2xl flex-col items-center gap-8 z-50 hidden md:flex">
-            <img
-                src="/eduvate-icon.png"
-                width={52}
-            />
+            <Link to={'/'}>
+                <img
+                    src="/eduvate-icon.png"
+                    width={52}
+                />
+            </Link>
             <div className="grow flex flex-col items-center gap-8">
                 {
                     features.map((feature) => (
@@ -49,7 +55,11 @@ export default function Sidebar() {
                             <Link
                                 to={feature.path}
                             >
-                                <button className="bg-violet-100 hover:bg-violet-200 p-4 rounded-2xl transition-all duration-300 ease-in-out text-black cursor-pointer" key={feature.name}>
+                                <button
+                                    className={`p-4 rounded-2xl transition-all duration-300 ease-in-out text-black cursor-pointer ${path === feature.path ? "bg-violet-500 text-white" : "bg-violet-100 hover:bg-violet-200"
+                                        }`}
+                                    key={feature.name}
+                                >
                                     <div className="flex flex-col items-center gap-2">
                                         {feature.icon}
                                     </div>
@@ -60,16 +70,30 @@ export default function Sidebar() {
                 }
             </div>
 
-            <Link
-                to={"/profile"}
-            >
-                <Avatar
-                    className="w-10 h-10"
+            <div className="flex flex-col items-center gap-8">
+                <SimpleTooltip
+                    content={'Logout'}
+                    side="right"
                 >
-                    <AvatarImage src="https://github.com/shadcn.png" alt="@shadcn" />
-                    <AvatarFallback>CN</AvatarFallback>
-                </Avatar>
-            </Link>
+                    <button
+                        className={`p-4 rounded-2xl transition-all duration-300 ease-in-out text-black cursor-pointer ${path === '/logout' ? "bg-violet-500 text-white" : "bg-violet-100 hover:bg-violet-200"}`}
+                        onClick={async () => {
+                            await authClient.signOut({
+                                fetchOptions: {
+                                    onSuccess: () => {
+                                        navigate('/logout')
+                                    },
+                                },
+                            });
+                        }}
+                    >
+                        <div className="flex flex-col items-center gap-2">
+                            <LogOut />
+                        </div>
+                    </button>
+                </SimpleTooltip>
+            </div>
+
 
 
         </motion.div>

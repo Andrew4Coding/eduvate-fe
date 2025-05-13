@@ -64,10 +64,10 @@ export async function loader(args: LoaderFunctionArgs) {
   if (session.get('ticket')) {
     console.log(session.get('ticket'));
     
-    return null;
+    return data({
+      backendUrl: process.env.BACKEND_URL,
+    });
   }
-
-  session.set('ticket', ticket);
 
   return data(
     {

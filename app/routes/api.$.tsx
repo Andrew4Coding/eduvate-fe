@@ -71,7 +71,7 @@ export const action: ActionFunction = async ({ request }) => {
             Cookie: cookieHeader || '', // Include the cookie header in the request
             Authorization: `Bearer ${ticket || ''}`,
             referer: request.headers.get('referer') || '', // Include the referer header
-            ...request.headers,
+            ...Object.fromEntries(request.headers.entries()),
         },
         credentials: 'include',
         body: request.method !== 'GET' ? JSON.stringify(body) : null,

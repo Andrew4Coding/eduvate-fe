@@ -95,9 +95,7 @@ export default function CourseDetail() {
     const [isEditSectionDialogOpen, setisEditSectionDialogOpen] = useState(false)
     const [isAddItemDialogOpen, setIsAddItemDialogOpen] = useState(false)
     const [isEditCourseDialogOpen, setIsEditCourseDialogOpen] = useState(false)
-    const [isItemDetailDialogOpen, setIsItemDetailDialogOpen] = useState(false)
     const [selectedSectionId, setSelectedSectionId] = useState<string | null>(null)
-    const [selectedItem, setSelectedItem] = useState<CourseItem | null>(null)
 
     const navigate = useNavigate()
 
@@ -141,7 +139,7 @@ export default function CourseDetail() {
             if (result.success) {
                 setIsAddSectionDialogOpen(false)
                 addSectionForm.reset()
-                navigate(`/courses/${course.id}`)
+                navigate(`/dashboard/courses/${course.id}`)
             }
         } catch (error) {
             toast.error(`Failed to add section: ${error}`)
@@ -155,7 +153,7 @@ export default function CourseDetail() {
             if (result.success) {
                 setisEditSectionDialogOpen(false)
                 editSectionForm.reset()
-                navigate(`/courses/${course.id}`)
+                navigate(`/dashboard/courses/${course.id}`)
             }
         } catch (error) {
             toast.error(`Failed to edit section: ${error}`)
@@ -172,7 +170,7 @@ export default function CourseDetail() {
                 toast.success("Course item added successfully")
                 setIsAddItemDialogOpen(false)
                 addCourseItemForm.reset()
-                navigate(`/courses/${course.id}`)
+                navigate(`/dashboard/courses/${course.id}`)
                 setIsLoading(false)
             }
         } catch (error) {
@@ -187,7 +185,7 @@ export default function CourseDetail() {
                 setIsEditCourseDialogOpen(false)
                 editCourseForm.reset()
                 toast.success("Course updated successfully")
-                navigate(`/courses/${course.id}`)
+                navigate(`/dashboard/courses/${course.id}`)
             }
         } catch (error) {
             toast.error(`Failed to update course: ${error}`)
@@ -199,7 +197,7 @@ export default function CourseDetail() {
             const result = await deleteSection(sectionId)
             if (result.success) {
                 toast.success("Section deleted successfully")
-                navigate(`/courses/${course.id}`)
+                navigate(`/dashboard/courses/${course.id}`)
             }
         } catch (error) {
             toast.error(`Failed to delete section: ${error}`)
@@ -211,7 +209,7 @@ export default function CourseDetail() {
             const result = await deleteCourseItem(itemId)
             if (result.success) {
                 toast.success("Course item deleted successfully")
-                navigate(`/courses/${course.id}`)
+                navigate(`/dashboard/courses/${course.id}`)
             }
         } catch (error) {
             toast.error(`Failed to delete Course Item: ${error}`)
@@ -223,19 +221,14 @@ export default function CourseDetail() {
         setIsAddItemDialogOpen(true)
     }
 
-    const openItemDetailDialog = (item: CourseItem) => {
-        setSelectedItem(item)
-        setIsItemDetailDialogOpen(true)
-    }
-
     // Function to navigate to the appropriate route based on item type
     const navigateToItemPage = (item: CourseItem) => {
         if (item.type === "MATERIAL" && item.Material) {
-            navigate(`/materials/${item.id}`)
+            navigate(`/dashboard/materials/${item.id}`)
         } else if (item.type === "QUIZ" && item.Quiz) {
-            navigate(`/quizzes/${item.id}`)
+            navigate(`/dashboard/quizzes/${item.id}`)
         } else if (item.type === "TASK" && item.Task) {
-            navigate(`/tasks/${item.id}`)
+            navigate(`/dashboard/tasks/${item.id}`)
         }
     }
 
@@ -245,8 +238,8 @@ export default function CourseDetail() {
 
     return (
         <div className="min-h-screen bg-white">
-            <div className="container mx-auto px-4 py-8">
-                <div className="flex justify-between items-center mb-8">
+            <div className="container mx-auto px-4 py-8 w-full">
+                <div className="flex max-md:flex-col justify-between md:items-center mb-8 gap-4">
                     <h1 className="text-3xl font-bold text-gray-800">Mata Pelajaran</h1>
 
                     {user.role === "teacher" && (
@@ -283,7 +276,7 @@ export default function CourseDetail() {
                                                     return
                                                 }
                                                 toast.success("Course deleted successfully")
-                                                navigate("/courses")
+                                                navigate("/dashboard/courses")
                                             }}
                                         >
                                             Delete
@@ -417,6 +410,9 @@ export default function CourseDetail() {
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 {section.CourseItem.map((item) => (
                                     <div
+                                        aria-description="content"
+                                        about={`${item.name} - ${item.type} - ${item.id}`}
+                                        id={item.id}
                                         key={item.id}
                                         className="bg-white rounded-xl p-4 shadow-sm cursor-pointer hover:shadow-md transition-shadow"
                                         onClick={() => navigateToItemPage(item)}

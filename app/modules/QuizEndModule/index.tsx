@@ -5,6 +5,7 @@ import {
   RotateCcw,
   Search,
   FileQuestion,
+  Eye,
 } from "lucide-react";
 
 import { Button } from "~/components/ui/button";
@@ -17,7 +18,7 @@ import {
   CardTitle,
 } from "~/components/ui/card";
 import { Progress } from "~/components/ui/progress";
-import { useLoaderData } from "react-router";
+import { useLoaderData, useNavigate } from "react-router";
 import type { Prisma } from "@prisma/client";
 
 interface Quiz
@@ -48,79 +49,65 @@ interface Quiz
 
 export default function QuizEndModule() {
   const quiz: Quiz = useLoaderData();
+  const navigate = useNavigate();
 
-  let timeSecond = Math.round((quiz.QuizSubmission[0].updatedAt.getTime() - quiz.QuizSubmission[0].createdAt.getTime()) / 1000);
-  let timeMinute = Math.round(timeSecond / 60);
-  timeSecond -= timeMinute * 60; 
+  const score = quiz.QuizSubmission[0]?.score ?? 0;
+  const totalQuestions = quiz._count.QuizQuestion;
+  const percentage = (score / totalQuestions) * 100;
 
   return (
     <div className="container flex items-center justify-center min-h-screen py-12">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-green-100">
-            <CheckCircle className="h-6 w-6 text-green-600" />
-          </div>
-          <CardTitle className="text-2xl font-bold">
-            You've completed the quiz!
-          </CardTitle>
-          <CardDescription>Great job on finishing {quiz.title}</CardDescription>
+          <CardTitle className="text-2xl font-bold">Quiz Completed!</CardTitle>
+          <CardDescription>Here's your performance summary</CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-6">
           <div className="space-y-2">
             <div className="flex justify-between text-sm">
               <span>Score</span>
-              <span className="font-medium">${quiz.QuizSubmission[0].score}/10</span>
+              <span className="font-medium">{score} / {totalQuestions}</span>
             </div>
-            <Progress value={80} className="h-2" />
+            <Progress value={percentage} className="h-2" />
           </div>
 
-          <div className="rounded-lg border p-4 space-y-3">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-2">
-                <FileQuestion className="h-4 w-4 text-muted-foreground" />
-                <span className="text-sm font-medium">Total Questions</span>
-              </div>
-              <span className="text-sm">{quiz._count.QuizQuestion}</span>
+          <div className="flex items-start space-x-3">
+            <Clock className="h-5 w-5 text-muted-foreground mt-0.5" />
+            <div>
+              <p className="font-medium">Time Taken</p>
+              <p className="text-sm text-muted-foreground">
+                {Math.round((new Date(quiz.QuizSubmission[0]?.updatedAt).getTime() - 
+                new Date(quiz.QuizSubmission[0]?.createdAt).getTime()) / 1000 / 60)} minutes
+              </p>
             </div>
+          </div>
 
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-2">
-                <CheckCircle className="h-4 w-4 text-muted-foreground" />
-                <span className="text-sm font-medium">Questions Answered</span>
-              </div>
-              <span className="text-sm">{quiz.QuizSubmission[0]._count.QuizSubmissionAnswer}</span>
-            </div>
-
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-2">
-                <Clock className="h-4 w-4 text-muted-foreground" />
-                <span className="text-sm font-medium">Time Taken</span>
-              </div>
-              <span className="text-sm">{timeMinute}:{timeSecond}</span>
+          <div className="flex items-start space-x-3">
+            <CheckCircle className="h-5 w-5 text-muted-foreground mt-0.5" />
+            <div>
+              <p className="font-medium">Questions Answered</p>
+              <p className="text-sm text-muted-foreground">
+                {quiz.QuizSubmission[0]?._count.QuizSubmissionAnswer} out of {totalQuestions} questions
+              </p>
             </div>
           </div>
         </CardContent>
-        <CardFooter className="flex flex-col space-y-2">
-          <div className="grid grid-cols-2 gap-2 w-full">
-            <a href="/quiz/review">
-              <Button variant="outline" className="w-full">
-                <Search className="mr-2 h-4 w-4" />
-                Review Answers
-              </Button>
-            </a>
-            <a href="/">
-              <Button variant="outline" className="w-full">
-                <RotateCcw className="mr-2 h-4 w-4" />
-                Retake Quiz
-              </Button>
-            </a>
-          </div>
-          <a href="/" className="w-full">
-            <Button variant="default" className="w-full">
-              <Home className="mr-2 h-4 w-4" />
-              Back to Home
-            </Button>
-          </a>
+        <CardFooter className="flex flex-col gap-4">
+          <Button 
+            onClick={() => navigate(`/quiz/${quiz.id}/review`)}
+            className="w-full flex items-center justify-center gap-2"
+            variant="outline"
+          >
+            <Eye className="h-4 w-4" />
+            Review Answers
+          </Button>
+          <Button 
+            onClick={() => navigate("/")}
+            className="w-full flex items-center justify-center gap-2"
+          >
+            <Home className="h-4 w-4" />
+            Back to Home
+          </Button>
         </CardFooter>
       </Card>
     </div>

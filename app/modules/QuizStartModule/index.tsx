@@ -1,7 +1,4 @@
-import type { Prisma } from "@prisma/client";
-import { ArrowRight, Clock, FileQuestion, Info } from "lucide-react";
-import { useLoaderData, useOutletContext } from "react-router";
-
+import { useLoaderData, useNavigate } from "react-router";
 import { Button } from "~/components/ui/button";
 import {
   Card,
@@ -11,6 +8,14 @@ import {
   CardHeader,
   CardTitle,
 } from "~/components/ui/card";
+import {
+  ArrowRight,
+  Clock,
+  FileQuestion,
+  Info,
+  Home,
+} from "lucide-react";
+import type { Prisma } from "@prisma/client";
 
 interface Quiz
   extends Prisma.QuizGetPayload<{
@@ -18,8 +23,6 @@ interface Quiz
       id: true;
       title: true;
       description: true;
-      openDate: true;
-      dueDate: true;
       duration: true;
       _count: {
         select: {
@@ -31,6 +34,7 @@ interface Quiz
 
 export default function QuizStartModule() {
   const quiz: Quiz = useLoaderData();
+  const navigate = useNavigate();
 
   return (
     <div className="container flex items-center justify-center min-h-screen py-12">
@@ -72,13 +76,23 @@ export default function QuizStartModule() {
             </div>
           </div>
         </CardContent>
-        <CardFooter>
-          <a href={`/quiz/progress/${quiz?.id}`} className="w-full">
-            <Button className="w-full cursor-pointer" size="lg">
-              Start Quiz
-              <ArrowRight className="ml-2 h-4 w-4" />
-            </Button>
-          </a>
+        <CardFooter className="flex flex-col gap-4">
+          <Button 
+            onClick={() => navigate(`/quiz/progress/${quiz?.id}`)}
+            className="w-full flex items-center justify-center gap-2"
+            size="lg"
+          >
+            Start Quiz
+            <ArrowRight className="h-4 w-4" />
+          </Button>
+          <Button 
+            onClick={() => navigate("/")}
+            variant="outline"
+            className="w-full flex items-center justify-center gap-2"
+          >
+            <Home className="h-4 w-4" />
+            Back to Home
+          </Button>
         </CardFooter>
       </Card>
     </div>

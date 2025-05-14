@@ -1,8 +1,11 @@
 import { useState, useMemo } from "react";
+import { useNavigate } from "react-router";
 import { type QuizForReview, type QuizSubmissionForReview } from "../index"; 
-import NavigationButtons from "../../QuizProgressModule/components/navigation-button"; // Re-using navigation, though submit won't be used
-import QuestionGrid from "../../QuizProgressModule/components/question-grid"; // Re-using grid
+import NavigationButtons from "../../QuizProgressModule/components/navigation-button";
+import QuestionGrid from "../../QuizProgressModule/components/question-grid";
 import ReviewQuestionDisplay from "./ReviewQuestionDisplay";
+import { Button } from "~/components/ui/button";
+import { Home } from "lucide-react";
 
 interface ReviewContainerProps {
   quiz: QuizForReview;
@@ -11,6 +14,7 @@ interface ReviewContainerProps {
 
 export default function ReviewContainer({ quiz, quizSubmission }: ReviewContainerProps) {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  const navigate = useNavigate();
 
   const userAnswersMap = useMemo(() => {
     const map = new Map<string, string | null>();
@@ -47,14 +51,25 @@ export default function ReviewContainer({ quiz, quizSubmission }: ReviewContaine
 
   return (
     <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-md p-6">
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-2xl font-semibold">
-          Question {currentQuestionIndex + 1} of {quiz.QuizQuestion.length}
-        </h2>
+      <div className="flex justify-between items-center mb-6">
+        <Button 
+          variant="outline" 
+          onClick={() => navigate("/")}
+          className="flex items-center gap-2"
+        >
+          <Home className="h-4 w-4" />
+          Back to Home
+        </Button>
         <div className="text-xl font-semibold">
           Score: {quizSubmission.score} / {quiz.QuizQuestion.length} 
           ({((quizSubmission.score / quiz.QuizQuestion.length) * 100).toFixed(2)}%)
         </div>
+      </div>
+
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-2xl font-semibold">
+          Question {currentQuestionIndex + 1} of {quiz.QuizQuestion.length}
+        </h2>
       </div>
 
       <ReviewQuestionDisplay

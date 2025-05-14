@@ -1,7 +1,7 @@
 import { enrollInCourse } from "~/modules/CourseModule/const";
-import type { TTS } from "./tts";
+import { audioManager, type AudioManager } from "./audio";
 
-function navigateToRouteWithAI(route: string, speech: TTS, isLast: boolean = false) {
+function navigateToRouteWithAI(route: string, speech: AudioManager, isLast: boolean = false) {
     if (typeof window !== 'undefined') {
 
         const url = new URL(route, window.location.origin);
@@ -14,38 +14,35 @@ function navigateToRouteWithAI(route: string, speech: TTS, isLast: boolean = fal
 
         if (isLast) {
             // Play audio
-            const audio = new Audio('/audios/navigation-success.mp3')
-            audio.play().catch()
+            audioManager.playAudio('/audios/navigation-success.mp3')
         }
     }
 }
 
-function clickButton(buttonId: string, speech: TTS) {
+function clickButton(buttonId: string, speech: AudioManager) {
     const button = document.getElementById(buttonId);
     if (button) {
         button.click();
-        const audio = new Audio('/audios/button-clicked.mp3')
-        audio.play().catch();
+        audioManager.playAudio('/audios/button-clicked.mp3')
 
     } else {
         console.error('Button not found:', buttonId);
     }
 }
 
-async function enrollCourse(code: string, speech: TTS) {
+async function enrollCourse(code: string, speech: AudioManager) {
     const data = await enrollInCourse(code.replaceAll(' ', '').replaceAll("_", "").replaceAll("-", "").toUpperCase());
 
     if (data.success) {
-        const audio = new Audio('/audios/enroll-success.mp3')
-        audio.play().catch();
+        audioManager.playAudio('/audios/enroll-success.mp3')
+
 
         setTimeout(() => {
             window.location.reload();
         }, 1000);
 
     } else {
-        const audio = new Audio('/audios/enroll-failed.mp3')
-        audio.play().catch();
+        audioManager.playAudio('/audios/enroll-failed.mp3')
     }
 }
 
@@ -93,7 +90,7 @@ function parsePromptResult(prompt: string) {
     return parsedCommands;
 }
 
-function executeCommand(command: string, speech: TTS) {
+function executeCommand(command: string, speech: AudioManager) {
     try {
         const parsedCommands = parsePromptResult(command);
         for (let i = 0; i < parsedCommands.length; i++) {

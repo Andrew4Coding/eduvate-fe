@@ -10,7 +10,7 @@ const KeyPressContext = createContext<KeyPressContextType>({
     isHeld: false,
 });
 
-export const KeyPressProvider = ({ children }: { children: React.ReactNode }) => {
+export const KeyPressProvider = ({ children, isStudent = true }: { children: React.ReactNode, isStudent: boolean }) => {
     const [spacePressed, setSpacePressed] = useState(false);
     const [isHeld, setIsHeld] = useState(false);
 
@@ -101,7 +101,12 @@ export const KeyPressProvider = ({ children }: { children: React.ReactNode }) =>
     }, []);
 
     return (
+        isStudent ?
         <KeyPressContext.Provider value={{ spacePressed, isHeld }}>
+            {children}
+            </KeyPressContext.Provider>
+            :
+        <KeyPressContext.Provider value={{ spacePressed: false, isHeld: false }}>
             {children}
         </KeyPressContext.Provider>
     );

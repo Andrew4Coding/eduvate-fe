@@ -334,22 +334,6 @@ export default function CourseManagement() {
                                             )}
                                         />
 
-                                        <FormField
-                                            control={createForm.control}
-                                            name="isHidden"
-                                            render={({ field }) => (
-                                                <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
-                                                    <div className="space-y-0.5">
-                                                        <FormLabel>Hidden Course</FormLabel>
-                                                        <FormDescription>Hide this course from the course listing</FormDescription>
-                                                    </div>
-                                                    <FormControl>
-                                                        <Switch checked={field.value} onCheckedChange={field.onChange} />
-                                                    </FormControl>
-                                                </FormItem>
-                                            )}
-                                        />
-
                                         <DialogFooter>
                                             <Button type="submit" disabled={creationStatus === "loading"}>
                                                 {creationStatus === "loading"

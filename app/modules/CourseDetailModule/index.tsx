@@ -48,18 +48,11 @@ import {
 } from "./const"
 
 // Component for course item icon based on type
-const CourseItemIcon = ({ type, fileType }: { type: string; fileType?: string }) => {
+const CourseItemIcon = ({ type }: { type: string }) => {
     if (type === "MATERIAL") {
-        if (fileType === "VIDEO") {
-            return (
-                <div className="bg-purple-200 p-4 rounded-lg">
-                    <Play className="h-8 w-8 text-purple-600" />
-                </div>
-            )
-        }
         return (
             <div className="bg-purple-200 p-4 rounded-lg">
-                <FileText className="h-8 w-8 text-purple-600" />
+                <Play className="h-8 w-8 text-purple-600" />
             </div>
         )
     }
@@ -418,7 +411,7 @@ export default function CourseDetail() {
                                         onClick={() => navigateToItemPage(item)}
                                     >
                                         <div className="flex items-center gap-4">
-                                            <CourseItemIcon type={item.type} fileType={item.Material?.fileType} />
+                                            <CourseItemIcon type={item.type} />
 
                                             <div className="flex-1">
                                                 <h4 className="font-medium text-gray-900">{item.name}</h4>
@@ -472,7 +465,7 @@ export default function CourseDetail() {
                     ))}
 
                     {course.CourseSection.length === 0 && (
-                        <div className="text-center py-12 bg-gray-50 rounded-xl">
+                        <div className="text-center py-12  rounded-xl">
                             <Smile className="h-12 w-12 text-gray-400 mx-auto mb-4" />
                             <h3 className="text-xl font-medium text-gray-700 mb-2">No sections yet</h3>
                             <p className="text-gray-500 mb-4">This course doesn't have any sections yet.</p>
@@ -561,7 +554,7 @@ export default function CourseDetail() {
                                         <FormLabel>Item Type</FormLabel>
                                         <Select onValueChange={field.onChange} defaultValue={field.value}>
                                             <FormControl>
-                                                <SelectTrigger>
+                                                <SelectTrigger className="w-full">
                                                     <SelectValue placeholder="Select item type" />
                                                 </SelectTrigger>
                                             </FormControl>
@@ -606,30 +599,6 @@ export default function CourseDetail() {
 
                             {itemType === "MATERIAL" && (
                                 <>
-                                    <FormField
-                                        control={addCourseItemForm.control}
-                                        name="fileType"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel>File Type</FormLabel>
-                                                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                                    <FormControl>
-                                                        <SelectTrigger>
-                                                            <SelectValue placeholder="Select file type" />
-                                                        </SelectTrigger>
-                                                    </FormControl>
-                                                    <SelectContent>
-                                                        <SelectItem value="PDF">PDF</SelectItem>
-                                                        <SelectItem value="VIDEO">Video</SelectItem>
-                                                        <SelectItem value="AUDIO">Audio</SelectItem>
-                                                        <SelectItem value="PPT">Presentation</SelectItem>
-                                                    </SelectContent>
-                                                </Select>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
-
                                     <FormField
                                         control={addCourseItemForm.control}
                                         name="file"

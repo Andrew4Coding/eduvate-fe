@@ -97,7 +97,7 @@ export const FileInput = ({
                 {...getRootProps()}
                 className={cn(
                     'h-[200px] md:h-[128px] lg:h-[150px] p-3  cursor-pointer flex justify-center items-center rounded-xl border border-dashed',
-                    !file ? 'bg-white border-violet-700' : 'bg-violet-300 border-violet-800',
+                    !file ? 'bg-white border-violet-700' : 'bg-purple-600 border-violet-800',
                     isDragActive ? 'active' : ''
                 )}
             >

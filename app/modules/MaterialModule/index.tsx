@@ -1,24 +1,15 @@
 import type { Prisma } from "@prisma/client"
-import { Headphones, Pause, Play, SkipBack, SkipForward, StopCircle, Volume2, VolumeX } from 'lucide-react'
+import { Pause, Play, SkipBack, SkipForward, Volume2, VolumeX } from 'lucide-react'
+import { marked } from 'marked'
 import { useEffect, useRef, useState } from "react"
 import { useLoaderData } from "react-router"
-import { Badge } from "~/components/ui/badge"
 import { Button } from "~/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card"
 import { Slider } from "~/components/ui/slider"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs"
 import { useKeyPress } from "~/hooks/useKeyPress"
 import useSpeakText from "~/hooks/useSpeakSpeech"
-import { audioManager } from "~/lib/speech/audio"
 
-interface TranscriptSegment {
-    id: string
-    start: number
-    end: number
-    text: string
-}
-
-export default function MaterialViewerModule() {
+export default function MaterialModule() {
     const loaderData: Prisma.MaterialGetPayload<{
         include: {
             courseItem: true
@@ -32,13 +23,21 @@ export default function MaterialViewerModule() {
     const [duration, setDuration] = useState(100) // Default duration
     const [volume, setVolume] = useState(0.8)
     const [isMuted, setIsMuted] = useState(false)
-    const [activeTranscriptId, setActiveTranscriptId] = useState<string | null>(null)
     const [currentSpeed, setCurrentSpeed] = useState(1)
-    const [transcript, setTranscript] = useState<TranscriptSegment[]>([])
-    const [activeTab, setActiveTab] = useState<"audio" | "speech">("audio")
 
     const audioRef = useRef<HTMLAudioElement>(null)
-    const transcriptRef = useRef<HTMLDivElement>(null)
+
+    const { isHeld } = useKeyPress();
+
+    useEffect(() => {
+        if (!audioRef.current) {
+            audioRef.current = new Audio();
+        }
+        const audio = audioRef.current;
+        if (audio && loaderData.audioUrl) {
+            audio.src = loaderData.audioUrl;
+        }
+    }, [loaderData.audioUrl]);
 
     // Handle spacebar for play/pause
     useEffect(() => {
@@ -53,36 +52,31 @@ export default function MaterialViewerModule() {
                 )
             ) {
                 e.preventDefault()
-                if (activeTab === "audio") {
-                    togglePlayPause()
-                } else {
-                    toggleSpeech()
-                }
+                togglePlayPause()
+            }
+
+            // Else if arrow down, lower audio volume
+            else if (e.code === "ArrowDown") {
+                const audio = audioRef.current
+                if (!audio) return
+
+                const newVolume = Math.max(audio.volume - 0.1, 0)
+                audio.volume = newVolume
+                setVolume(newVolume)
+            }
+            else if (e.code === "ArrowUp") {
+                const audio = audioRef.current
+                if (!audio) return
+
+                const newVolume = Math.min(audio.volume + 0.1, 1)
+                audio.volume = newVolume
+                setVolume(newVolume)
             }
         }
 
         document.addEventListener("keydown", handleKeyDown)
         return () => document.removeEventListener("keydown", handleKeyDown)
-    }, [isPlaying, activeTab, speech.isSpeaking])
-
-    // Update active transcript based on current time
-    useEffect(() => {
-        const activeSegment = transcript.find((segment) => currentTime >= segment.start && currentTime <= segment.end)
-
-        if (activeSegment) {
-            setActiveTranscriptId(activeSegment.id)
-
-            // Auto-scroll to active transcript
-            if (transcriptRef.current) {
-                const activeElement = document.getElementById(activeSegment.id)
-                if (activeElement) {
-                    activeElement.scrollIntoView({ behavior: "smooth", block: "center" })
-                }
-            }
-        } else {
-            setActiveTranscriptId(null)
-        }
-    }, [currentTime, transcript])
+    }, [isPlaying, speech.isSpeaking])
 
     // Handle audio time updates
     useEffect(() => {
@@ -106,20 +100,13 @@ export default function MaterialViewerModule() {
         }
     }, [])
 
-    // Update playback rate when speed changes
-    useEffect(() => {
-        const audio = audioRef.current
-        if (!audio) return
-
-        audio.playbackRate = currentSpeed
-    }, [currentSpeed])
-
-
-    const { isHeld } = useKeyPress();
-
     useEffect(() => {
         if (isHeld) {
             setIsPlaying(false)
+            const audio = audioRef.current
+            if (audio) {
+                audio.pause()
+            }
         }
     }, [isHeld])
 
@@ -128,30 +115,16 @@ export default function MaterialViewerModule() {
             return
         }
 
-        audioManager.audio = new Audio(loaderData.fileUrl)
+        const audio = audioRef.current
 
         if (isPlaying) {
-            console.log("Pausing");
-            
-            audioManager.stopAudio()
+            audio?.pause()
         } else {
-            console.log("Audio URL:", loaderData.fileUrl);
+            console.log("Audio URL:", loaderData.audioUrl);
 
-            audioManager.continueAudio()
+            audio?.play()
         }
         setIsPlaying(!isPlaying)
-    }
-
-    const toggleSpeech = () => {
-        if (speech.isSpeaking) {
-            speech.stopSpeaking()
-        } else {
-            speech.speak(loaderData.transcripted)
-        }
-    }
-
-    const speakSegment = (segment: TranscriptSegment) => {
-        speech.speak(segment.text)
     }
 
     const handleSeek = (value: number[]) => {
@@ -165,6 +138,7 @@ export default function MaterialViewerModule() {
 
     const handleVolumeChange = (value: number[]) => {
         const audio = audioRef.current
+
         if (!audio) return
 
         const newVolume = value[0]
@@ -205,20 +179,6 @@ export default function MaterialViewerModule() {
         audio.currentTime = Math.max(audio.currentTime - 10, 0)
     }
 
-    const jumpToTranscript = (start: number) => {
-        const audio = audioRef.current
-        if (!audio) return
-
-        audio.currentTime = start
-
-        if (!isPlaying) {
-            audio.play().catch((error) => {
-                console.error("Error playing audio:", error)
-            })
-            setIsPlaying(true)
-        }
-    }
-
     const changePlaybackSpeed = () => {
         // Cycle through common playback speeds: 0.5, 0.75, 1, 1.25, 1.5, 2
         const speeds = [0.5, 0.75, 1, 1.25, 1.5, 2]
@@ -248,12 +208,7 @@ export default function MaterialViewerModule() {
                     <CardTitle className="text-violet-800">Audio Player</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4 pt-4">
-                    <audio
-                        ref={audioRef}
-                        src={loaderData.fileUrl}
-                        preload="metadata"
-                        aria-label={`Audio for ${loaderData.courseItem.name}`}
-                    />
+                    <audio id="main-audio" src={loaderData.audioUrl ?? ''}></audio>
 
                     <div className="space-y-2">
                         <div className="flex items-center justify-between">
@@ -330,8 +285,9 @@ export default function MaterialViewerModule() {
                         <CardTitle className="text-violet-800">Transcripted</CardTitle>
                     </CardHeader>
                     <CardContent className=""> 
-                        <p className="text-lg/loose text-justify">
-                            {loaderData.transcripted}
+                        <p className="text-lg/loose text-justify"
+                            dangerouslySetInnerHTML={{ __html: marked(loaderData.transcripted || '') }}
+                        >
                         </p>
                     </CardContent>
                 </Card>

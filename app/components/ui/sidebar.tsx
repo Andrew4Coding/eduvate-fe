@@ -1,20 +1,21 @@
-import { Laptop2, LayoutGrid, LogOut } from "lucide-react";
-import { SimpleTooltip } from "./tooltip";
 import { motion } from "framer-motion";
+import { Laptop2, LayoutGrid, LogOut, Paperclip } from "lucide-react";
 import { Link, useLocation, useNavigate } from "react-router";
+import { SimpleTooltip } from "./tooltip";
 
-import {
-    Avatar,
-    AvatarFallback,
-    AvatarImage,
-} from "~/components/ui/avatar";
 import { authClient } from "~/lib/auth-client";
 
+
+enum ROLE {
+    STUDENT,
+    TEACHER
+}
 
 const features: {
     name: string;
     icon: React.JSX.Element;
     path: string;
+    role?: ROLE[]
 }[] = [
         {
             name: "Home",
@@ -25,6 +26,12 @@ const features: {
             name: "Course",
             icon: <Laptop2 />,
             path: "/dashboard/courses"
+        },
+        {
+            name: "Quiz",
+            icon: <Paperclip />,
+            path: "/dashboard/quizzes",
+            role: [ROLE.TEACHER]
         }
     ]
 export default function Sidebar() {

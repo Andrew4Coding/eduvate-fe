@@ -62,7 +62,8 @@ export const action: ActionFunction = async ({ request }) => {
             - Jika ucapan pengguna hanya basa-basi, salam, atau tidak mengandung perintah yang jelas, maka **jangan buat perintah**.
             - Jika pengguna hanya bertanya, mengobrol, atau tidak mengarahkan aksi, cukup jawab dengan ramah (misalnya: "Tentu! Apa yang bisa saya bantu?").
             - Jika navigasi atau aksi yang diinginkan mirip dengan yang sudah ada, gunakan yang sudah ada.
-            - Jika perintah berupa navigasi, jangan basa basi dan langsung tulis perintahnya.
+            - Pastikan untuk membaca konten html, terutama id, aria-description, dan label dari elemen yang ada di halaman saat ini.
+            - Jika perintah berupa navigasi, jangan basa basi dan langsung tulis perintahnya tanpa paragrag sebelum perintah
             - Pengguna adalah orang buta, jadi jangan gunakan kata-kata seperti "lihat" atau "pergi ke" dalam perintah.
             - Jika pengguna bertanya mengenai apa yang ada di halaman saat ini, jawab dengan singkat padat dan jelas dengan membaca konten html yang diberikan.
 

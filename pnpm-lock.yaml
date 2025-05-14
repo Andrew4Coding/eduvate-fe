@@ -101,6 +101,9 @@ importers:
       lucide-react:
         specifier: ^0.486.0
         version: 0.486.0(react@19.0.0)
+      marked:
+        specifier: ^15.0.11
+        version: 15.0.11
       next-themes:
         specifier: ^0.4.6
         version: 0.4.6(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
@@ -2709,6 +2712,11 @@ packages:
 
   make-event-props@1.6.2:
     resolution: {integrity: sha512-iDwf7mA03WPiR8QxvcVHmVWEPfMY1RZXerDVNCRYW7dUr2ppH3J58Rwb39/WG39yTZdRSxr3x+2v22tvI0VEvA==}
+
+  marked@15.0.11:
+    resolution: {integrity: sha512-1BEXAU2euRCG3xwgLVT1y0xbJEld1XOrmRJpUwRCcy7rxhSCwMrmEu9LXoPhHSCJG41V7YcQ2mjKRr5BA3ITIA==}
+    engines: {node: '>= 18'}
+    hasBin: true
 
   math-intrinsics@1.1.0:
     resolution: {integrity: sha512-/IXtbwEk5HTPyEwyKX6hGkYXxM9nbj64B+ilVJnC/R6B0pH5G4V3b0pVbL7DBj4tkhBAppbQUlf6F6Xl9LHu1g==}
@@ -6509,6 +6517,8 @@ snapshots:
   make-cancellable-promise@1.3.2: {}
 
   make-event-props@1.6.2: {}
+
+  marked@15.0.11: {}
 
   math-intrinsics@1.1.0: {}
 

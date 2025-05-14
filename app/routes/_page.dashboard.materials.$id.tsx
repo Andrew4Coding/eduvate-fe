@@ -1,6 +1,6 @@
 import prisma from "prisma/prisma";
 import { redirect, type LoaderFunctionArgs } from "react-router";
-import MaterialViewer from "~/modules/MaterialModule";
+import MaterialModule from "~/modules/MaterialModule";
 
 export async function loader(args: LoaderFunctionArgs) {
     const params = args.params;
@@ -24,5 +24,5 @@ export async function loader(args: LoaderFunctionArgs) {
 }
 
 export default function Index() {
-    return <MaterialViewer />
+    return <MaterialModule />
 }

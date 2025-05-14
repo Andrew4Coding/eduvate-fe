@@ -1,7 +1,6 @@
 import { Prisma } from "@prisma/client";
 // import pdfToText from 'react-pdftotext';
 import { z } from "zod";
-import { fetchClient } from "~/lib/fetch";
 import uploadFileClient from "~/lib/file";
 const addSectionSchema = z.object({
     name: z.string().min(1, "Section name is required"),
@@ -28,7 +27,7 @@ const editCourseSchema = z.object({
 
 // Mock functions for API calls
 const addSection = async (courseId: string, data: z.infer<typeof addSectionSchema>) => {
-    const responseData = await fetchClient("/api/course/section", {
+    const responseData = await fetch("/api/course/section", {
         method: "POST",
         body: JSON.stringify({
             courseId,
@@ -53,7 +52,7 @@ const addCourseItem = async (sectionId: string, data: z.infer<typeof addCourseIt
         // const text = await pdfToText(data.file as File)
         const text = "test"
 
-        const responseData = await fetchClient("/api/material/create", {
+        const responseData = await fetch("/api/material/create", {
             method: "POST",
             body: JSON.stringify({
                 courseSectionId: sectionId,
@@ -70,7 +69,7 @@ const addCourseItem = async (sectionId: string, data: z.infer<typeof addCourseIt
 
         return { success: true, id: "new-item-id" }
     } else if (data.type === "QUIZ") {
-        const responseData = fetchClient("/api/quiz/create", {
+        const responseData = fetch("/api/quiz/create", {
             method: "POST",
             body: JSON.stringify({
                 courseSectionId: sectionId,
@@ -84,7 +83,7 @@ const addCourseItem = async (sectionId: string, data: z.infer<typeof addCourseIt
 
         return { success: true, id: "new-item-id" }
     } else if (data.type === "TASK") {
-        const responseData = fetchClient("/api/task/create", {
+        const responseData = fetch("/api/task/create", {
             method: "POST",
             body: JSON.stringify({
                 courseSectionId: sectionId,
@@ -102,7 +101,7 @@ const addCourseItem = async (sectionId: string, data: z.infer<typeof addCourseIt
 }
 
 const updateCourse = async (courseId: string, data: z.infer<typeof editCourseSchema>) => {
-    const responseData = await fetchClient(`/api/course/${courseId}`, {
+    const responseData = await fetch(`/api/course/${courseId}`, {
         method: "PUT",
         body: JSON.stringify(data),
     })
@@ -113,7 +112,7 @@ const updateCourse = async (courseId: string, data: z.infer<typeof editCourseSch
 }
 
 const updateSection = async (sectionId: string, data: z.infer<typeof addSectionSchema>) => {
-    const responseData = await fetchClient(`/api/course/section/${sectionId}`, {
+    const responseData = await fetch(`/api/course/section/${sectionId}`, {
         method: "PUT",
         body: JSON.stringify(data),
     })
@@ -124,17 +123,19 @@ const updateSection = async (sectionId: string, data: z.infer<typeof addSectionS
 }
 
 const deleteCourse = async (courseId: string) => {
-    const responseData = await fetchClient(`/api/course/${courseId}`, {
+    const responseData = await fetch(`/api/course/${courseId}`, {
         method: "DELETE",
     })
     if (!responseData) {
         throw new Error("Failed to delete course")
     }
-    return { success: true }
+    return { 
+        success: true,
+     }
 }
 
 const deleteSection = async (sectionId: string) => {
-    const responseData = await fetchClient(`/api/course/section/${sectionId}`, {
+    const responseData = await fetch(`/api/course/section/${sectionId}`, {
         method: "DELETE",
     })
     if (!responseData) {
@@ -144,7 +145,7 @@ const deleteSection = async (sectionId: string) => {
 }
 
 const deleteCourseItem = async (itemId: string) => {
-    const responseData = await fetchClient(`/api/course/item/${itemId}`, {
+    const responseData = await fetch(`/api/course/item/${itemId}`, {
         method: "DELETE",
     })
 

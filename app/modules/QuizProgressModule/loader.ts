@@ -76,5 +76,8 @@ export async function quizProgressLoader(args: LoaderFunctionArgs) {
   // 3. Attach the correct submission to the quiz object
   (quiz as any).QuizSubmission = [currentQuizSubmissionWithAnswers]; // Ensure it's an array
 
-  return quiz;
+  // 4. Add a flag to indicate if the quiz is already completed and graded
+  const isAlreadyCompleted = currentQuizSubmissionWithAnswers?.isGraded === true;
+
+  return { ...quiz, isAlreadyCompleted }; // Spread quiz and add the flag
 }

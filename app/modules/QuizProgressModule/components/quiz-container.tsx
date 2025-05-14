@@ -1,21 +1,52 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router";
 import QuestionDisplay from "./question-display";
 import NavigationButtons from "./navigation-button";
 import QuestionGrid from "./question-grid";
 import Timer from "./timer";
-import { type Quiz } from "../index";
-import { fetchClient } from "~/lib/fetch";
+import { type Quiz as BaseQuiz } from "../index"; // Renamed to BaseQuiz
+
+// Extended Quiz type to include isAlreadyCompleted
+interface Quiz extends BaseQuiz {
+  isAlreadyCompleted?: boolean;
+}
 
 export default function QuizContainer({ quiz }: { quiz: Quiz }) {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [userAnswers, setUserAnswers] = useState<(string | null)[]>([]);
-  const [timeRemaining, setTimeRemaining] = useState(quiz.duration * 60); // 30 minutes in seconds
+  const [timeRemaining, setTimeRemaining] = useState(quiz?.duration ? quiz.duration * 60 : 0);
   const [quizCompleted, setQuizCompleted] = useState(false);
+  const navigate = useNavigate();
 
-  const handleAnswerSelect = (answerId: string) => {
+  useEffect(() => {
+    if (quiz?.duration) {
+      setTimeRemaining(quiz.duration * 60);
+    }
+  }, [quiz?.duration]);
+
+  const handleAnswerSelect = async (answerId: string) => {
     const newAnswers = [...userAnswers];
     newAnswers[currentQuestionIndex] = answerId;
     setUserAnswers(newAnswers);
+
+    // Optimistically update UI, then save to backend
+    try {
+      await fetch("/api/quiz/answer", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          quizId: quiz.id,
+          quizAttemptId: quiz.QuizSubmission[0]?.id, // Assuming the attempt ID is available
+          questionId: quiz.QuizQuestion[currentQuestionIndex].id,
+          answer: answerId,
+        }),
+      });
+    } catch (error) {
+      console.error("Failed to save answer:", error);
+      // Optionally: revert optimistic update or show error to user
+    }
   };
 
   const handlePrevious = () => {
@@ -35,17 +66,29 @@ export default function QuizContainer({ quiz }: { quiz: Quiz }) {
   };
 
   const handleSubmitQuiz = async () => {
-    await fetch("/api/quiz/submit", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        quizId: quiz.id,
-        questionSeq: quiz.QuizQuestion.map((question) => question.id),
-        answers: userAnswers,
-      }),
-    });
+    try {
+      const response = await fetch("/api/quiz/submit", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          quizId: quiz.id,
+          questionSeq: quiz.QuizQuestion.map((question) => question.id),
+          answers: userAnswers,
+          quizAttemptId: quiz.QuizSubmission[0]?.id,
+        }),
+      });
+
+      if (response.ok) {
+        setQuizCompleted(true);
+        navigate(`/quiz/end/${quiz.id}`);
+      } else {
+        console.error("Failed to submit quiz:", await response.text());
+      }
+    } catch (error) {
+      console.error("Error submitting quiz:", error);
+    }
   };
 
   const handleTimeExpired = () => {
@@ -75,6 +118,29 @@ export default function QuizContainer({ quiz }: { quiz: Quiz }) {
 
     setUserAnswers(orderedUserAnswers);
   }, [quiz]);
+
+  if (quiz?.isAlreadyCompleted) {
+    return (
+      <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-md p-6 text-center">
+        <h2 className="text-xl font-semibold mb-4">Quiz Already Completed</h2>
+        <p>You have already completed this quiz.</p>
+        <button 
+          onClick={() => navigate(`/quiz/${quiz.id}/review`)}
+          className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+        >
+          Review Answers
+        </button>
+      </div>
+    );
+  }
+
+  if (!quiz || !quiz.QuizQuestion) {
+    return (
+      <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-md p-6 text-center">
+        <p>Loading quiz...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-md p-6">

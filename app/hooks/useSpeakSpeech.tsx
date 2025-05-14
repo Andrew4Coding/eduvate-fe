@@ -52,11 +52,6 @@ const useSpeakText = () => {
     }, []);
 
     const speak = (text: string) => {
-        if (typeof window === "undefined" || !("speechSynthesis" in window)) {
-            setState(prev => ({ ...prev, error: "Speech synthesis not supported in this browser." }));
-            return;
-        }
-
         if (!text) {
             setState(prev => ({ ...prev, error: "Text is empty." }));
             return;
@@ -68,7 +63,7 @@ const useSpeakText = () => {
 
         // Split text into chunks of 50 words
         const words = text.split(" ");
-        const chunks = [];
+        const chunks: any[] = [];
         for (let i = 0; i < words.length; i += 50) {
             chunks.push(words.slice(i, i + 50).join(" "));
         }
@@ -82,7 +77,6 @@ const useSpeakText = () => {
             error: ""
         }));
 
-        const synth = window.speechSynthesis;
         const now = Date.now();
 
         // Optional: debounce if needed between speaks

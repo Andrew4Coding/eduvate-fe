@@ -1,20 +1,24 @@
 "use client"
 
-import { AnimatePresence, motion } from "framer-motion"
+import { motion } from "framer-motion"
 import { Mic, Settings } from "lucide-react"
 import { useEffect, useState } from "react"
 import { Button } from "~/components/ui/button"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "~/components/ui/dialog"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "~/components/ui/select"
 import { useKeyPress } from "~/hooks/useKeyPress"
-import useSpeakText from "~/hooks/useSpeakSpeech"
 import useVoiceRecorder from "~/hooks/useVoiceRecord"
-import { executeCommand } from "~/lib/command"
-import getPageContent from "~/lib/page-content"
+import AudioPlayer from "~/lib/speech/audio"
+import { executeCommand } from "~/lib/speech/command"
+import getPageContent from "~/lib/speech/page-content"
+import { TTS } from "~/lib/speech/tts"
 
 export default function VoiceIndicator() {
     const { isHeld } = useKeyPress()
-    const speech = useSpeakText()
+    
+    const audioPlayer = new AudioPlayer();
+    const tts = new TTS();
+
     const [showMicDialog, setShowMicDialog] = useState(false)
     const [isLoading, setIsLoading] = useState(false)
     const [isFirstTime, setIsFirstTime] = useState(true)
@@ -33,7 +37,7 @@ export default function VoiceIndicator() {
             // Here you can send the audio to your API
             console.log("Recording completed", { blob, url })
 
-            const beep = new Audio("/beep.mp3")
+            const beep = new Audio("/audios/beep.mp3")
             console.log("beep");
 
             beep.play().catch()
@@ -58,6 +62,10 @@ export default function VoiceIndicator() {
 
             formData.append("pageContent", getPageContent())
 
+            await audioPlayer.playAudio("/audios/mikir.mp3")
+            
+            audioPlayer.playAudio("/audios/tick.mp3")
+            
             // Send to your API endpoint
             const response = await fetch("/api/transcribe", {
                 method: "POST",
@@ -86,21 +94,17 @@ export default function VoiceIndicator() {
                     // Speak the sentence before EXECCOMMAND
                     const beforeCommandText = cleanedText.substring(0, cleanedText.indexOf("EXECCOMMAND")).trim()
                     if (beforeCommandText) {
-                        speech.stopSpeaking()
-                        speech.speak(beforeCommandText)
+                        await tts.speak(beforeCommandText)
                     }
 
                     // Get text starting from EXECCOMMAND but still includes EXECCOMMAND
                     const commandText = cleanedText.substring(
                         cleanedText.indexOf("EXECCOMMAND") + "EXECCOMMAND".length
                     )
-                    return executeCommand(commandText.trim().replaceAll("EXECCOMMAND", ""), speech)
+                    return executeCommand(commandText.trim().replaceAll("EXECCOMMAND", ""), tts)
                 } else {
-                    // Speak the cleaned text
-                    speech.stopSpeaking()
-                    speech.speak(cleanedText)
+                    await tts.speak(cleanedText)
                 }
-
             }
         } catch (error) {
             console.error("Error processing audio:", error)
@@ -116,14 +120,16 @@ export default function VoiceIndicator() {
 
     // Handle recording based on space key
     useEffect(() => {
-        speech.stopSpeaking();
+        tts.stopSpeak()
         // Only allow recording if microphone setup is complete
         if (isHeld && initialSetupDone && isFirstTime) {
             sessionStorage.setItem("hasInteracted", "true")
-            speech.speak("Halo! Apa yang bisa aku bantu?")
+            const halo = new Audio("/audios/halo.mp3")
+            halo.play().catch()
+
             startRecording()
 
-            const beep = new Audio("/beep.mp3")
+            const beep = new Audio("/audios/beep.mp3")
             beep.play().catch()
         } else if (!isHeld && initialSetupDone) {
             stopRecording()
@@ -182,34 +188,7 @@ export default function VoiceIndicator() {
             </Dialog>
 
             {/* Speech Subtitle with Progressive Text Display */}
-            <AnimatePresence>
-                {speech.isSpeaking && (
-                    <motion.div
-                        className="fixed bottom-10 left-1/2 transform -translate-x-1/2 bg-black/50 text-white py-2 rounded-xl shadow-lg px-6 max-h-24 overflow-hidden z-50"
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: 10 }}
-                        transition={{ duration: 0.3 }}
-                        style={{ maxWidth: "80vw" }}
-                    >
-                        <div className="relative">
-                            <p className="text-center pb-1 whitespace-pre-wrap break-words">
-                                {speech.spokenText.slice(speech.spokenText.lastIndexOf("\n") + 1)}
-                            </p>
-                            {/* Progress bar */}
-                            <div className="w-full h-0.5 bg-gray-600 rounded-full mt-1 overflow-hidden">
-                                <motion.div
-                                    className="h-full bg-white"
-                                    initial={{ width: "0%" }}
-                                    animate={{ width: `${speech.progress}%` }}
-                                    transition={{ ease: "linear" }}
-                                />
-                            </div>
-                        </div>
-                    </motion.div>
-                )}
-            </AnimatePresence>
-
+   
             {/* Voice Button */}
             <div className="fixed bottom-32 md:bottom-10 right-4 md:right-10 flex flex-col items-end space-y-4">
                 {/* Settings Button */}

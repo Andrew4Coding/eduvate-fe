@@ -69,7 +69,6 @@ export const action: ActionFunction = async ({ request }) => {
         Cookie: cookieHeader || '', // Include the cookie header in the request
         Authorization: `Bearer ${ticket || ''}`,
         referer: request.headers.get('referer') || '', // Include the referer header
-        ...Object.fromEntries(request.headers.entries()),
     });
 
     console.log(headers);

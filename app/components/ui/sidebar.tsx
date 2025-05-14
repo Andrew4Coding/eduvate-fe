@@ -37,7 +37,7 @@ export default function Sidebar() {
             animate={{ x: 0 }}
             exit={{ x: -200 }}
             transition={{ duration: 0.5 }}
-            className="p-8 rounded-r-4xl bg-gray-100 left-0 h-[90%] shadow-2xl flex-col items-center gap-8 z-50 hidden md:flex">
+            className="p-8 rounded-r-4xl bg-gray-100 left-0 h-[90%] shadow-2xl flex-col items-center gap-8 z-50 hidden md:flex fixed">
             <Link to={'/'}>
                 <img
                     src="/eduvate-icon.png"

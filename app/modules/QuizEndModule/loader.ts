@@ -26,7 +26,11 @@ export async function quizEndLoader(args: LoaderFunctionArgs) {
       },
       QuizSubmission: {
         where: {
-          student: { id: user.id },
+          student: {
+            user: {
+              id: user.id,
+            }
+          },
         },
         select: {
             createdAt: true,

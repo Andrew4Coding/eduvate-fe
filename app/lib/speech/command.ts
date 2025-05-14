@@ -1,7 +1,7 @@
-import type { UseSpeakTextType } from "~/hooks/useSpeakSpeech";
 import { enrollInCourse } from "~/modules/CourseModule/const";
+import type { TTS } from "./tts";
 
-function navigateToRouteWithAI(route: string, speech: UseSpeakTextType, isLast: boolean = false) {
+function navigateToRouteWithAI(route: string, speech: TTS, isLast: boolean = false) {
     if (typeof window !== 'undefined') {
 
         const url = new URL(route, window.location.origin);
@@ -13,33 +13,39 @@ function navigateToRouteWithAI(route: string, speech: UseSpeakTextType, isLast: 
         window.dispatchEvent(new PopStateEvent('popstate', { state: { path: newUrl } }));
 
         if (isLast) {
-            speech.speak(`Navigasi berhasil`)
+            // Play audio
+            const audio = new Audio('/audios/navigation-success.mp3')
+            audio.play().catch()
         }
     }
 }
 
-function clickButton(buttonId: string, speech: UseSpeakTextType) {
+function clickButton(buttonId: string, speech: TTS) {
     const button = document.getElementById(buttonId);
     if (button) {
         button.click();
-        speech.speak(`Button berhasil diklik`);
+        const audio = new Audio('/audios/button-clicked.mp3')
+        audio.play().catch();
+
     } else {
         console.error('Button not found:', buttonId);
     }
 }
 
-async function enrollCourse(code: string, speech: UseSpeakTextType) {
+async function enrollCourse(code: string, speech: TTS) {
     const data = await enrollInCourse(code.replaceAll(' ', '').replaceAll("_", "").replaceAll("-", "").toUpperCase());
 
     if (data.success) {
-        speech.speak(`Berhasil mendaftar di course ${code}, merefresh halaman`);
+        const audio = new Audio('/audios/enroll-success.mp3')
+        audio.play().catch();
 
         setTimeout(() => {
             window.location.reload();
         }, 1000);
 
     } else {
-        speech.speak(`Gagal mendaftar di course ${code}, apakah kode sudah benar?`);
+        const audio = new Audio('/audios/enroll-failed.mp3')
+        audio.play().catch();
     }
 }
 
@@ -87,8 +93,7 @@ function parsePromptResult(prompt: string) {
     return parsedCommands;
 }
 
-function executeCommand(command: string, speech: UseSpeakTextType) {
-    console.log(command);
+function executeCommand(command: string, speech: TTS) {
     try {
         const parsedCommands = parsePromptResult(command);
         for (let i = 0; i < parsedCommands.length; i++) {

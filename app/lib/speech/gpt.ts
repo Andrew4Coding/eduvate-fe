@@ -27,28 +27,3 @@ export async function getResponseFromAI(prompt: string, context?: string): Promi
     const responseText = chatData.choices[0].message.content;
     return responseText;
 }
-
-export async function parseAudioIntoTextWithAI(audioFile: File): Promise<string> {
-    const formData = new FormData();
-    formData.append("audio", audioFile);
-    formData.append("model", "whisper-1");
-    
-    const whisperResponse = await fetch("https://api.openai.com/v1/audio/transcriptions", {
-        method: "POST",
-        headers: {
-            Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
-        },
-        body: formData,
-    })
-
-    if (!whisperResponse.ok) {
-        const errorData = await whisperResponse.json()
-        console.error("Whisper API error:", errorData)
-        throw new Error("Failed to transcribe audio")
-    }
-
-    const transcriptionData = await whisperResponse.json()
-    const transcribedText = transcriptionData.text
-
-    return transcribedText
-}

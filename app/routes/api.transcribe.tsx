@@ -1,6 +1,6 @@
 import type { ActionFunction } from "react-router";
 import * as build from 'virtual:react-router/server-build';
-import { getResponseFromAI } from "~/lib/gpt";
+import { getResponseFromAI } from "~/lib/speech/gpt";
 
 export const action: ActionFunction = async ({ request }) => {
     try {
@@ -111,10 +111,8 @@ export const action: ActionFunction = async ({ request }) => {
             enroll
             ADA201
             `
-        
         console.log("Transcribed Text:", transcribedText);
         
-
         const responseText = await getResponseFromAI(transcribedText, navigatePrompt)
 
         // Return both the transcribed text and the response

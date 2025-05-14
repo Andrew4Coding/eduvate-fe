@@ -76,8 +76,6 @@ export const action: ActionFunction = async ({ request }) => {
         referer: request.headers.get('referer') || '', // Include the referer header
     });
 
-    console.log(headers);
-
     const realApiResponse = await fetch(`${process.env.BACKEND_URL}${path}`, {
         method: request.method,
         headers: headers,

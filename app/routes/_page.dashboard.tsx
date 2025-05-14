@@ -23,17 +23,14 @@ export default function Index() {
             onClick={async () => {}}
         >
             <img src="/home-bg.png" alt="" className="fixed w-screen h-screen z-0 object-cover opacity-60" />
-            <KeyPressProvider isStudent={user.role === "student"}>
+            <KeyPressProvider isStudent={true}>
                 <Sidebar />
                 <Navbar />
                 <div className="h-full w-full relative md:pl-40">
                     <Outlet
                         context={user}
                     />
-                    {
-                        user.role === "student" && 
-                        <VoiceIndicator />
-                    }
+                    <VoiceIndicator />
                 </div>
             </KeyPressProvider>
         </main>

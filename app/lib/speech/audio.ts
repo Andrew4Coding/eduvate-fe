@@ -75,6 +75,18 @@ export class AudioManager {
         });
     }
 
+    async pauseAudio() { 
+        if (this.audio) {
+            this.audio.pause();
+        }
+    }
+
+    async continueAudio() {
+        if (this.audio) {
+            this.audio.play();
+        }
+    }
+
     async stopAudio() {
         if (this.audio) {
             this.audio.pause();

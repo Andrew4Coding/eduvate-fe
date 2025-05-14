@@ -1,14 +1,15 @@
-import { useState, useEffect, useRef } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card"
-import { Button } from "~/components/ui/button"
-import { Slider } from "~/components/ui/slider"
-import { Pause, Play, SkipBack, SkipForward, Volume2, VolumeX, Headphones, StopCircle } from 'lucide-react'
 import type { Prisma } from "@prisma/client"
+import { Headphones, Pause, Play, SkipBack, SkipForward, StopCircle, Volume2, VolumeX } from 'lucide-react'
+import { useEffect, useRef, useState } from "react"
 import { useLoaderData } from "react-router"
-import useSpeakText from "~/hooks/useSpeakSpeech"
 import { Badge } from "~/components/ui/badge"
+import { Button } from "~/components/ui/button"
+import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card"
+import { Slider } from "~/components/ui/slider"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs"
 import { useKeyPress } from "~/hooks/useKeyPress"
+import useSpeakText from "~/hooks/useSpeakSpeech"
+import { audioManager } from "~/lib/speech/audio"
 
 interface TranscriptSegment {
     id: string
@@ -123,40 +124,21 @@ export default function MaterialViewerModule() {
     }, [isHeld])
 
     const togglePlayPause = () => {
-        const audio = audioRef.current
-        if (!audio) return
-
         if (isHeld) {
             return
         }
 
+        audioManager.audio = new Audio(loaderData.fileUrl)
+
         if (isPlaying) {
-            speech.stopSpeaking()
-        } else {
-            console.log("Playing audio");
-
-            console.log("Audio URL:", loaderData.transcripted);
+            console.log("Pausing");
             
-            const words = loaderData.transcripted.split(" ");
-            const chunkSize = 50;
-            const chunks = [];
+            audioManager.stopAudio()
+        } else {
+            console.log("Audio URL:", loaderData.fileUrl);
 
-            for (let i = 0; i < words.length; i += chunkSize) {
-                chunks.push(words.slice(i, i + chunkSize).join(" "));
-            }
-
-            let currentChunkIndex = 0;
-
-            const speakChunks = () => {
-                if (currentChunkIndex < chunks.length) {
-                    speech.speak(chunks[currentChunkIndex], () => {
-                        currentChunkIndex++;
-                        speakChunks();
-                    });
-                }
-            };
-
-            speakChunks();}
+            audioManager.continueAudio()
+        }
         setIsPlaying(!isPlaying)
     }
 
@@ -261,185 +243,99 @@ export default function MaterialViewerModule() {
                 <p className="text-violet-600">{loaderData.courseItem.description}</p>
             </div>
 
-            <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as "audio" | "speech")} className="mt-6">
-                <TabsList className="grid grid-cols-2 w-full max-w-md mx-auto">
-                    <TabsTrigger value="audio">Audio Player</TabsTrigger>
-                    <TabsTrigger value="speech">Text-to-Speech</TabsTrigger>
-                </TabsList>
+            <Card className="bg-white border-violet-200 mt-4">
+                <CardHeader className="pb-3 border-b border-violet-100">
+                    <CardTitle className="text-violet-800">Audio Player</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4 pt-4">
+                    <audio
+                        ref={audioRef}
+                        src={loaderData.fileUrl}
+                        preload="metadata"
+                        aria-label={`Audio for ${loaderData.courseItem.name}`}
+                    />
 
-                <TabsContent value="audio">
-                    <Card className="bg-white border-violet-200 mt-4">
-                        <CardHeader className="pb-3 border-b border-violet-100">
-                            <CardTitle className="text-violet-800">Audio Player</CardTitle>
-                        </CardHeader>
-                        <CardContent className="space-y-4 pt-4">
-                            <audio
-                                ref={audioRef}
-                                src={loaderData.fileUrl}
-                                preload="metadata"
-                                aria-label={`Audio for ${loaderData.courseItem.name}`}
-                            />
-
-                            <div className="space-y-2">
-                                <div className="flex items-center justify-between">
-                                    <span className="text-sm text-violet-700">{formatTime(currentTime)}</span>
-                                    <span className="text-sm text-violet-700">{formatTime(duration)}</span>
-                                </div>
-                                <Slider
-                                    value={[currentTime]}
-                                    max={duration}
-                                    step={0.1}
-                                    onValueChange={handleSeek}
-                                    className="cursor-pointer"
-                                    aria-label="Audio progress"
-                                />
-                            </div>
-
-                            <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-2">
-                                    <Button
-                                        variant="ghost"
-                                        size="icon"
-                                        onClick={toggleMute}
-                                        className="text-violet-600 hover:text-violet-800 hover:bg-violet-50"
-                                    >
-                                        {isMuted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
-                                    </Button>
-                                    <Slider
-                                        value={[isMuted ? 0 : volume]}
-                                        max={1}
-                                        step={0.01}
-                                        onValueChange={handleVolumeChange}
-                                        className="w-20 cursor-pointer"
-                                        aria-label="Volume"
-                                    />
-                                </div>
-
-                                <div className="flex items-center gap-2">
-                                    <Button
-                                        variant="ghost"
-                                        size="icon"
-                                        onClick={skipBackward}
-                                        className="text-violet-600 hover:text-violet-800 hover:bg-violet-50"
-                                    >
-                                        <SkipBack className="h-4 w-4" />
-                                    </Button>
-                                    <Button size="icon" onClick={togglePlayPause} className="bg-violet-600 hover:bg-violet-700 text-white">
-                                        {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
-                                    </Button>
-                                    <Button
-                                        variant="ghost"
-                                        size="icon"
-                                        onClick={skipForward}
-                                        className="text-violet-600 hover:text-violet-800 hover:bg-violet-50"
-                                    >
-                                        <SkipForward className="h-4 w-4" />
-                                    </Button>
-                                </div>
-
-                                <Button
-                                    variant="outline"
-                                    size="sm"
-                                    onClick={changePlaybackSpeed}
-                                    className="border-violet-300 text-violet-700 hover:bg-violet-50"
-                                >
-                                    {currentSpeed}x
-                                </Button>
-                            </div>
-                        </CardContent>
-                    </Card>
-                </TabsContent>
-
-                <TabsContent value="speech">
-                    <Card className="bg-white border-violet-200 mt-4">
-                        <CardHeader className="pb-3 border-b border-violet-100">
-                            <div className="flex justify-between items-center">
-                                <CardTitle className="text-violet-800">Text-to-Speech</CardTitle>
-                                {speech.isSpeaking && (
-                                    <Badge variant="outline" className="bg-violet-100 text-violet-800">
-                                        Speaking...
-                                    </Badge>
-                                )}
-                            </div>
-                        </CardHeader>
-                        <CardContent className="space-y-4 pt-4">
-                            <div className="flex justify-center mb-4">
-                                <Button
-                                    onClick={toggleSpeech}
-                                    className={speech.isSpeaking ? "bg-red-500 hover:bg-red-600" : "bg-violet-600 hover:bg-violet-700"}
-                                    size="lg"
-                                >
-                                    {speech.isSpeaking ? (
-                                        <>
-                                            <StopCircle className="mr-2 h-4 w-4" /> Stop Speaking
-                                        </>
-                                    ) : (
-                                        <>
-                                            <Headphones className="mr-2 h-4 w-4" /> Read Aloud
-                                        </>
-                                    )}
-                                </Button>
-                            </div>
-
-                            {speech.isSpeaking && (
-                                <div className="space-y-2">
-                                    <div className="h-2 w-full bg-violet-100 rounded-full overflow-hidden">
-                                        <div
-                                            className="h-full bg-violet-600 transition-all duration-300"
-                                            style={{ width: `${speech.progress}%` }}
-                                        ></div>
-                                    </div>
-                                </div>
-                            )}
-
-                            {speech.error && (
-                                <div className="p-3 bg-red-50 border border-red-200 rounded-md text-red-700 text-sm">
-                                    {speech.error}
-                                </div>
-                            )}
-                        </CardContent>
-                    </Card>
-                </TabsContent>
-            </Tabs>
-
-            {transcript.length > 0 && (
-                <Card className="bg-white border-violet-200 mt-6">
-                    <CardHeader className="pb-3 border-b border-violet-100">
-                        <CardTitle className="text-violet-800">Transcript</CardTitle>
-                    </CardHeader>
-                    <CardContent className="p-0">
-                        <div ref={transcriptRef} className="max-h-[400px] overflow-y-auto p-4">
-                            {transcript.map((segment) => (
-                                <div
-                                    id={segment.id}
-                                    key={segment.id}
-                                    className={`transcript-segment ${activeTranscriptId === segment.id ? "active" : ""} ${speech.isSpeaking && speech.spokenText.includes(segment.text) ? "bg-violet-50" : ""
-                                        }`}
-                                    onClick={() => activeTab === "audio" ? jumpToTranscript(segment.start) : speakSegment(segment)}
-                                >
-                                    <div className="flex items-center justify-between mb-1">
-                                        <span className="text-xs font-medium text-violet-500">{formatTime(segment.start)}</span>
-                                        {activeTab === "speech" && (
-                                            <Button
-                                                variant="ghost"
-                                                size="sm"
-                                                className="h-6 text-violet-600 hover:text-violet-800 hover:bg-violet-50"
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    speakSegment(segment);
-                                                }}
-                                            >
-                                                <Headphones className="h-3 w-3 mr-1" /> Speak
-                                            </Button>
-                                        )}
-                                    </div>
-                                    <p className="text-gray-800">{segment.text}</p>
-                                </div>
-                            ))}
+                    <div className="space-y-2">
+                        <div className="flex items-center justify-between">
+                            <span className="text-sm text-violet-700">{formatTime(currentTime)}</span>
+                            <span className="text-sm text-violet-700">{formatTime(duration)}</span>
                         </div>
+                        <Slider
+                            value={[currentTime]}
+                            max={duration}
+                            step={0.1}
+                            onValueChange={handleSeek}
+                            className="cursor-pointer"
+                            aria-label="Audio progress"
+                        />
+                    </div>
+
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={toggleMute}
+                                className="text-violet-600 hover:text-violet-800 hover:bg-violet-50"
+                            >
+                                {isMuted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
+                            </Button>
+                            <Slider
+                                value={[isMuted ? 0 : volume]}
+                                max={1}
+                                step={0.01}
+                                onValueChange={handleVolumeChange}
+                                className="w-20 cursor-pointer"
+                                aria-label="Volume"
+                            />
+                        </div>
+
+                        <div className="flex items-center gap-2">
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={skipBackward}
+                                className="text-violet-600 hover:text-violet-800 hover:bg-violet-50"
+                            >
+                                <SkipBack className="h-4 w-4" />
+                            </Button>
+                            <Button size="icon" onClick={togglePlayPause} className="bg-violet-600 hover:bg-violet-700 text-white">
+                                {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
+                            </Button>
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={skipForward}
+                                className="text-violet-600 hover:text-violet-800 hover:bg-violet-50"
+                            >
+                                <SkipForward className="h-4 w-4" />
+                            </Button>
+                        </div>
+
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={changePlaybackSpeed}
+                            className="border-violet-300 text-violet-700 hover:bg-violet-50"
+                        >
+                            {currentSpeed}x
+                        </Button>
+                    </div>
+                </CardContent>
+            </Card>
+
+            <section>
+                <Card className="bg-white border-violet-200 mt-4">
+                    <CardHeader className="border-b border-violet-100">
+                        <CardTitle className="text-violet-800">Transcripted</CardTitle>
+                    </CardHeader>
+                    <CardContent className=""> 
+                        <p className="text-lg/loose text-justify">
+                            {loaderData.transcripted}
+                        </p>
                     </CardContent>
                 </Card>
-            )}
+            </section>
         </div>
     )
 }

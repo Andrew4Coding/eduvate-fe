@@ -1,5 +1,5 @@
 import { Prisma } from "@prisma/client";
-// import pdfToText from 'react-pdftotext';
+import pdfToText from 'react-pdftotext';
 import { z } from "zod";
 import uploadFileClient from "~/lib/file";
 const addSectionSchema = z.object({
@@ -49,15 +49,14 @@ const addCourseItem = async (sectionId: string, data: z.infer<typeof addCourseIt
         // Upload file into /api/upload
         const url = await uploadFileClient(data.file as File, data.file!.name, data.fileType as string)
 
-        // const text = await pdfToText(data.file as File)
+        const text = await pdfToText(data.file as File)
 
         const response = await fetch("/api/material/create", {
             method: "POST",
             body: JSON.stringify({
                 courseSectionId: sectionId,
                 ...data,
-                // transcripted: text,
-                transcripted: "",
+                transcripted: text,
                 fileUrl: url.url,
             }),
         })

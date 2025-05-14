@@ -1,5 +1,3 @@
-"use client"
-
 import { motion } from "framer-motion"
 import { Mic, Settings } from "lucide-react"
 import { useEffect, useState } from "react"
